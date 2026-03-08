@@ -4,7 +4,7 @@ import { useContext } from 'react';
 import { useDarkMode } from '../../context/DarkModeContext';
 import useProblemSubmissionResult from '../../hooks/useProblemSubmissionResult';
 import {
-  FirebaseSubmission,
+  GroupSubmission,
   getSubmissionStatus,
   getSubmissionTimestampString,
 } from '../../models/groups/problem';
@@ -13,8 +13,8 @@ import CodeBlock from '../markdown/CodeBlock/CodeBlock';
 const ProblemSubmissionPopupContext = React.createContext<{
   showPopup: boolean;
   setShowPopup: (showPopup: boolean) => void;
-  submission: FirebaseSubmission | null;
-  setSubmission: (submission: FirebaseSubmission) => void;
+  submission: GroupSubmission | null;
+  setSubmission: (submission: GroupSubmission) => void;
 } | null>(null);
 
 function ProblemSubmissionPopup() {
@@ -147,7 +147,7 @@ function ProblemSubmissionPopup() {
 
 export function ProblemSubmissionPopupProvider({ children }) {
   const [showPopup, setShowPopup] = React.useState(false);
-  const [submission, setSubmission] = React.useState<FirebaseSubmission | null>(
+  const [submission, setSubmission] = React.useState<GroupSubmission | null>(
     null
   );
   return (
@@ -171,7 +171,7 @@ export function useProblemSubmissionPopupAction() {
     throw 'useProblemSubmissionPopupAction() must be used in a ProblemSubmissionPopupContext';
   }
 
-  return (submission: FirebaseSubmission) => {
+  return (submission: GroupSubmission) => {
     popupContext.setSubmission(submission);
     popupContext.setShowPopup(true);
   };

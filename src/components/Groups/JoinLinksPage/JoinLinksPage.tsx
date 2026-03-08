@@ -118,8 +118,7 @@ const JoinLinksPage = () => {
                                 Expires{' '}
                                 <i>
                                   {link.expirationTime
-                                    ? link.expirationTime
-                                        .toDate()
+                                    ? new Date(link.expirationTime)
                                         .toString()
                                         .substr(0, 33)
                                     : 'never'}

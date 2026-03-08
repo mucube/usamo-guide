@@ -53,7 +53,7 @@ This document summarizes the major changes made to transform the USACO Guide cod
 
 ## Infrastructure and Services
 
-- Updated analytics endpoints, Firebase config placeholders, and storage bucket names.
+- Updated analytics endpoints, Supabase config placeholders, and storage bucket names.
 - Updated domain references to usamo.guide across the site.
 - Removed USACO auto-update workflow and related scripts.
 - Updated link checker to remove USACO-specific exclusions.

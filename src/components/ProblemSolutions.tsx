@@ -23,7 +23,7 @@ import {
   useSetUserLangSetting,
   useUserLangSetting,
 } from '../context/UserDataContext/properties/simpleProperties';
-import { useFirebaseUser } from '../context/UserDataContext/UserDataContext';
+import { useCurrentUser } from '../context/UserDataContext/UserDataContext';
 import { useUserPermissions } from '../context/UserDataContext/UserPermissionsContext';
 import useUserProblemSolutionActions from '../hooks/useUserProblemSolutionActions';
 import useUserSolutionsForProblem from '../hooks/useUserSolutionsForProblem';
@@ -43,7 +43,7 @@ export default function ProblemSolutions({
     useUserSolutionsForProblem(problem);
   const { deleteSolution, upvoteSolution, undoUpvoteSolution, mutateSolution } =
     useUserProblemSolutionActions();
-  const firebaseUser = useFirebaseUser();
+  const currentUser = useCurrentUser();
   const lang = useUserLangSetting();
   const setLang = useSetUserLangSetting();
   const [isContactUsActive, setIsContactUsActive] = useState(false);
@@ -62,7 +62,7 @@ export default function ProblemSolutions({
   });
 
   const publicSolutions = (solutions ?? []).filter(
-    submission => submission.userID !== firebaseUser?.uid
+    submission => submission.userID !== currentUser?.uid
   );
 
   publicSolutions?.sort((a, b) => b.upvotes.length - a.upvotes.length);
@@ -197,9 +197,9 @@ export default function ProblemSolutions({
 
         <button
           className="btn-primary my-4"
-          onClick={() => (firebaseUser ? showSubmitSolutionModal() : signIn())}
+          onClick={() => (currentUser ? showSubmitSolutionModal() : signIn())}
         >
-          {firebaseUser ? 'Submit a Solution' : 'Sign in to submit a solution'}
+          {currentUser ? 'Submit a Solution' : 'Sign in to submit a solution'}
         </button>
         <button
           className="btn-primary mx-3 my-4"
@@ -278,12 +278,12 @@ export default function ProblemSolutions({
                     <h4 className="mb-2 text-gray-700 dark:text-gray-100">
                       {submission.userName ?? 'Unknown User'} | Votes:{' '}
                       {submission.upvotes.length}.{' '}
-                      {firebaseUser?.uid && (
+                      {currentUser?.uid && (
                         <button
                           className="text-blue-600 hover:underline focus:outline-hidden dark:text-blue-300"
                           onClick={() => {
                             if (
-                              submission.upvotes.includes(firebaseUser?.uid)
+                              submission.upvotes.includes(currentUser?.uid)
                             ) {
                               undoUpvoteSolution(submission.id);
                             } else {
@@ -291,7 +291,7 @@ export default function ProblemSolutions({
                             }
                           }}
                         >
-                          {submission.upvotes.includes(firebaseUser?.uid)
+                          {submission.upvotes.includes(currentUser?.uid)
                             ? '(Undo Upvote)'
                             : '(Upvote)'}
                         </button>

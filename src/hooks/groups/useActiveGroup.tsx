@@ -1,23 +1,13 @@
-import type { CollectionReference } from 'firebase/firestore';
-import {
-  collection,
-  doc,
-  DocumentReference,
-  getFirestore,
-  onSnapshot,
-  query,
-  where,
-} from 'firebase/firestore';
 import * as React from 'react';
 import { ReactNode } from 'react';
 import toast from 'react-hot-toast';
 import {
-  useFirebaseUser,
+  useCurrentUser,
   useIsUserDataLoaded,
 } from '../../context/UserDataContext/UserDataContext';
+import { supabase } from '../../lib/supabaseClient';
 import { GroupData, isUserAdminOfGroup } from '../../models/groups/groups';
 import { PostData } from '../../models/groups/posts';
-import { useFirebaseApp } from '../useFirebase';
 
 const ActiveGroupContext = React.createContext<{
   activeGroupId: string;
@@ -28,7 +18,7 @@ const ActiveGroupContext = React.createContext<{
   showAdminView: boolean;
   setInStudentView: (inStudentView: boolean) => void;
   /**
-   * Who to view the group as. Usually it's just firebaseUser.uid, but sometimes
+   * Who to view the group as. Usually it's just currentUser.uid, but sometimes
    * (ie if parent wants to view child's progress, or if owner views member's progress)
    * it could be different
    */
@@ -37,7 +27,7 @@ const ActiveGroupContext = React.createContext<{
 } | null>(null);
 
 export function ActiveGroupProvider({ children }: { children: ReactNode }) {
-  const firebaseUser = useFirebaseUser();
+  const currentUser = useCurrentUser();
   const isUserLoaded = useIsUserDataLoaded();
   const [activeGroupId, setActiveGroupId] = React.useState<string>('');
   const [posts, setPosts] = React.useState<PostData[]>([]);
@@ -46,81 +36,114 @@ export function ActiveGroupProvider({ children }: { children: ReactNode }) {
   const [isLoading, setIsLoading] = React.useState(true);
   const [groupData, setGroupData] = React.useState<GroupData>();
 
-  useFirebaseApp(
-    firebaseApp => {
-      //reset all Group states
-      setGroupData(undefined);
-      setPosts([]);
-      setInStudentView(false);
-      setActiveUserId(undefined);
+  React.useEffect(() => {
+    // reset all Group states
+    setGroupData(undefined);
+    setPosts([]);
+    setInStudentView(false);
+    setActiveUserId(undefined);
 
-      setIsLoading(true);
-      if (!activeGroupId || !isUserLoaded) {
-        //still loading/waiting...
-        return;
-      }
-      if (!firebaseUser?.uid) {
-        setIsLoading(false);
-        return;
+    setIsLoading(true);
+    if (!activeGroupId || !isUserLoaded) {
+      return;
+    }
+    if (!currentUser?.uid) {
+      setIsLoading(false);
+      return;
+    }
+
+    let alive = true;
+
+    const fetchGroup = async () => {
+      const { data: group, error: groupError } = await supabase
+        .from('groups')
+        .select('*')
+        .eq('id', activeGroupId)
+        .maybeSingle();
+
+      if (!alive) return;
+      if (groupError) {
+        toast.error(groupError.message);
+        setGroupData(undefined);
+      } else {
+        setGroupData(
+          group
+            ? ({
+                id: group.id,
+                name: group.name,
+                description: group.description,
+                ownerIds: group.owner_ids ?? [],
+                adminIds: group.admin_ids ?? [],
+                memberIds: group.member_ids ?? [],
+                postOrdering: group.post_ordering ?? [],
+              } as GroupData)
+            : undefined
+        );
       }
 
-      let loadedPosts = false,
-        loadedGroup = false;
-      const unsubscribePosts = onSnapshot(
-        query(
-          collection(
-            getFirestore(firebaseApp),
-            'groups',
-            activeGroupId,
-            'posts'
-          ) as CollectionReference<PostData>,
-          where('isDeleted', '==', false)
-        ),
-        snap => {
-          loadedPosts = true;
-          setPosts(snap.docs.map(doc => ({ ...doc.data(), id: doc.id })));
-          if (loadedGroup && loadedPosts) setIsLoading(false);
-        },
-        error => {
-          if (error.code === 'permission-denied') {
-            setIsLoading(false);
-            setPosts([]);
-          } else {
-            toast.error(error.message);
-          }
-        }
-      );
-      const unsubscribeGroup = onSnapshot(
-        doc(
-          getFirestore(firebaseApp),
-          'groups',
-          activeGroupId
-        ) as DocumentReference<GroupData>,
-        doc => {
-          loadedGroup = true;
-          setGroupData(doc.data());
-          if (loadedGroup && loadedPosts) setIsLoading(false);
-        },
-        error => {
-          if (error.code === 'permission-denied') {
-            setIsLoading(false);
-            setGroupData(undefined);
-          } else {
-            toast.error(error.message);
-          }
-        }
-      );
-      return () => {
-        unsubscribeGroup();
-        unsubscribePosts();
-      };
-    },
-    [activeGroupId, firebaseUser?.uid, isUserLoaded]
-  );
+      const { data: postsData, error: postsError } = await supabase
+        .from('group_posts')
+        .select('*')
+        .eq('group_id', activeGroupId)
+        .eq('is_deleted', false);
+
+      if (!alive) return;
+      if (postsError) {
+        toast.error(postsError.message);
+        setPosts([]);
+      } else {
+        setPosts(
+          (postsData ?? []).map(post => ({
+            id: post.id,
+            name: post.name,
+            timestamp: post.timestamp,
+            body: post.body,
+            isPinned: post.is_pinned,
+            isPublished: post.is_published,
+            isDeleted: post.is_deleted,
+            type: post.type,
+            pointsPerProblem: post.points_per_problem ?? {},
+            problemOrdering: post.problem_ordering ?? [],
+            ...(post.type === 'assignment'
+              ? { dueTimestamp: post.due_at }
+              : {}),
+          })) as PostData[]
+        );
+      }
+
+      setIsLoading(false);
+    };
+
+    fetchGroup();
+
+    const groupChannel = supabase
+      .channel(`group_${activeGroupId}`)
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'groups', filter: `id=eq.${activeGroupId}` },
+        () => fetchGroup()
+      )
+      .subscribe();
+
+    const postsChannel = supabase
+      .channel(`group_posts_${activeGroupId}`)
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'group_posts', filter: `group_id=eq.${activeGroupId}` },
+        () => fetchGroup()
+      )
+      .subscribe();
+
+    return () => {
+      alive = false;
+      supabase.removeChannel(groupChannel);
+      supabase.removeChannel(postsChannel);
+    };
+  }, [activeGroupId, currentUser?.uid, isUserLoaded]);
 
   const isUserAdmin = isUserAdminOfGroup(
     groupData,
-    activeUserId ?? firebaseUser?.uid
+    activeUserId ?? currentUser?.uid
   );
   return (
     <ActiveGroupContext.Provider
@@ -135,7 +158,7 @@ export function ActiveGroupProvider({ children }: { children: ReactNode }) {
           setInStudentView(newVal);
           if (!newVal) setActiveUserId(undefined);
         },
-        activeUserId: activeUserId ?? firebaseUser?.uid,
+        activeUserId: activeUserId ?? currentUser?.uid,
         setActiveUserId,
       }}
     >

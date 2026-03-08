@@ -1,7 +1,8 @@
 import * as React from 'react';
-import { useFirebaseUser } from './UserDataContext';
+import { supabase } from '../../lib/supabaseClient';
+import { useCurrentUser } from './UserDataContext';
 
-// the value is the firebase claim name
+// the value is the profile permission field name
 export type UserPermissions = 'isAdmin' | 'canModerate' | 'canCreateGroups';
 
 export const UserPermissionInformation: {
@@ -36,23 +37,37 @@ export const UserPermissionsContextProvider = ({ children }) => {
 
   const [permissions, setPermissions] =
     React.useState<{ [key in UserPermissions]: boolean }>(defaultPermissions);
-  const firebaseUser = useFirebaseUser();
+  const currentUser = useCurrentUser();
 
   React.useEffect(() => {
-    if (firebaseUser?.uid) {
-      (firebaseUser.getIdTokenResult() as any).then(
-        ({ claims }: { claims: { [key in UserPermissions]: boolean } }) => {
+    let alive = true;
+    if (currentUser?.uid) {
+      supabase
+        .from('profiles')
+        .select('is_admin, can_moderate, can_create_groups')
+        .eq('id', currentUser.uid)
+        .maybeSingle()
+        .then(({ data, error }) => {
+          if (!alive) return;
+          if (error) {
+            // eslint-disable-next-line no-console
+            console.error(error);
+            setPermissions(defaultPermissions);
+            return;
+          }
           setPermissions({
-            isAdmin: !!claims.isAdmin,
-            canModerate: !!claims.canModerate,
-            canCreateGroups: !!claims.canCreateGroups,
+            isAdmin: !!data?.is_admin,
+            canModerate: !!data?.can_moderate,
+            canCreateGroups: !!data?.can_create_groups,
           });
-        }
-      );
+        });
     } else {
       setPermissions(defaultPermissions);
     }
-  }, [firebaseUser]);
+    return () => {
+      alive = false;
+    };
+  }, [currentUser?.uid]);
 
   const data = React.useMemo(
     () => ({

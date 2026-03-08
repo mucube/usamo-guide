@@ -5,18 +5,8 @@ import {
   DialogTitle,
 } from '@headlessui/react';
 import { XIcon } from '@heroicons/react/solid';
-import {
-  AuthCredential,
-  getAuth,
-  GithubAuthProvider,
-  GoogleAuthProvider,
-  linkWithCredential,
-  signInWithCredential,
-  signInWithPopup,
-} from 'firebase/auth';
 import React from 'react';
-import { useForceFirebaseUserRerender } from '../context/UserDataContext/UserDataContext';
-import { useFirebaseApp } from '../hooks/useFirebase';
+import { supabase } from '../lib/supabaseClient';
 import { LoadingSpinner } from './elements/LoadingSpinner';
 
 export interface SignInModalProps {
@@ -28,93 +18,69 @@ export const SignInModal: React.FC<SignInModalProps> = ({
   isOpen,
   onClose,
 }) => {
-  const firebaseApp = useFirebaseApp();
-  // TODO: test to see whether this actually works
-  const forceFirebaseUserRerender = useForceFirebaseUserRerender();
   const [isSigningIn, setIsSigningIn] = React.useState(false);
-  const [isLinking, setIsLinking] = React.useState(false);
   const [error, setError] = React.useState<any>(null);
   const [email, setEmail] = React.useState('');
-  const [credential, setCredential] = React.useState<AuthCredential | null>(
-    null
-  );
+  const [password, setPassword] = React.useState('');
+  const [isSigningUp, setIsSigningUp] = React.useState(false);
 
-  const diffCredentialMessage = 'auth/account-exists-with-different-credential';
   const handleSignInWithGoogle = () => {
     setIsSigningIn(true);
     setError(null);
-    signInWithPopup(getAuth(firebaseApp), new GoogleAuthProvider())
-      .then(() => {
-        setIsSigningIn(false);
-        onClose();
-      })
-      .catch(e => {
-        if (e.code === diffCredentialMessage) {
-          setIsLinking(true);
-          const credential = GoogleAuthProvider.credentialFromError(e);
-          setEmail(e.customData.email);
-          setCredential(credential);
+    supabase.auth
+      .signInWithOAuth({ provider: 'google' })
+      .then(({ error }) => {
+        if (error) {
+          setError(error);
         } else {
-          setError(e);
+          onClose();
         }
       })
-      .finally(() => {
-        setIsSigningIn(false);
-      });
+      .finally(() => setIsSigningIn(false));
   };
   const handleSignInWithGithub = () => {
     setIsSigningIn(true);
     setError(null);
-    signInWithPopup(getAuth(firebaseApp), new GithubAuthProvider())
-      .then(() => {
-        onClose();
-      })
-      .catch(e => {
-        if (e.code === diffCredentialMessage) {
-          setIsLinking(true);
-          const credential = GithubAuthProvider.credentialFromError(e);
-          setEmail(e.customData.email);
-          setCredential(credential);
+    supabase.auth
+      .signInWithOAuth({ provider: 'github' })
+      .then(({ error }) => {
+        if (error) {
+          setError(error);
         } else {
-          setError(e);
+          onClose();
         }
       })
-      .finally(() => {
-        setIsSigningIn(false);
-      });
+      .finally(() => setIsSigningIn(false));
   };
 
-  // links account from credential with the account from other provider (either Google or Github)
-  const handleLinkAccounts = async () => {
-    if (!credential) return;
-    try {
-      let otherProvider: GoogleAuthProvider | GithubAuthProvider;
-      if (credential.signInMethod === 'github.com') {
-        otherProvider = new GoogleAuthProvider();
-      } else if (credential.signInMethod === 'google.com') {
-        otherProvider = new GithubAuthProvider();
-      } else {
-        throw new Error('Unsupported sign in method');
-      }
-      otherProvider.setCustomParameters({ login_hint: email });
-      await signInWithPopup(getAuth(firebaseApp), otherProvider);
-      await linkWithCredential(getAuth(firebaseApp).currentUser!, credential);
-      await signInWithCredential(getAuth(firebaseApp), credential);
-
-      // At this point, getAuth(firebaseApp).currentUser is updated with the latest credentials
-      // However, onAuthStateChanged() is not called, so we need to manually notify React
-      // that firebaseUser has changed and we should rerender things that depend on it.
-      // In particular, without this, the "Linked Providers" section under "Sign In Methods"
-      // in Settings will not update until the page is reloaded.
-      forceFirebaseUserRerender();
-
+  const handleEmailSignIn = async () => {
+    setIsSigningIn(true);
+    setError(null);
+    const { error } = await supabase.auth.signInWithPassword({
+      email,
+      password,
+    });
+    if (error) {
+      setError(error);
+    } else {
       onClose();
-    } catch (e) {
-      setError(e);
-      console.log(e);
-    } finally {
-      setIsLinking(false);
     }
+    setIsSigningIn(false);
+  };
+
+  const handleEmailSignUp = async () => {
+    setIsSigningIn(true);
+    setError(null);
+    const { error } = await supabase.auth.signUp({
+      email,
+      password,
+    });
+    if (error) {
+      setError(error);
+    } else {
+      onClose();
+    }
+    setIsSigningIn(false);
   };
 
   React.useEffect(() => {
@@ -177,7 +143,7 @@ export const SignInModal: React.FC<SignInModalProps> = ({
                   type="button"
                   className="btn pl-3"
                   onClick={handleSignInWithGoogle}
-                  disabled={!firebaseApp || isSigningIn}
+                  disabled={isSigningIn}
                 >
                   <svg
                     version="1.1"
@@ -213,7 +179,7 @@ export const SignInModal: React.FC<SignInModalProps> = ({
                   type="button"
                   className="btn pl-3"
                   onClick={handleSignInWithGithub}
-                  disabled={!firebaseApp || isSigningIn}
+                  disabled={isSigningIn}
                 >
                   <svg
                     xmlns="http://www.w3.org/2000/sv"
@@ -242,27 +208,60 @@ export const SignInModal: React.FC<SignInModalProps> = ({
                 </button>
                 {isSigningIn && <LoadingSpinner />}
               </div>
+              <div className="mt-4 space-y-3">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-200">
+                    Email
+                  </label>
+                  <input
+                    type="email"
+                    value={email}
+                    onChange={e => setEmail(e.target.value)}
+                    className="input mt-1"
+                    placeholder="you@example.com"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-200">
+                    Password
+                  </label>
+                  <input
+                    type="password"
+                    value={password}
+                    onChange={e => setPassword(e.target.value)}
+                    className="input mt-1"
+                    placeholder="••••••••"
+                  />
+                </div>
+                <div className="flex flex-wrap gap-3">
+                  <button
+                    type="button"
+                    className="btn"
+                    disabled={isSigningIn || !email || !password}
+                    onClick={handleEmailSignIn}
+                  >
+                    Sign In With Email
+                  </button>
+                  <button
+                    type="button"
+                    className="btn"
+                    disabled={isSigningIn || !email || !password}
+                    onClick={() => {
+                      setIsSigningUp(true);
+                      handleEmailSignUp().finally(() =>
+                        setIsSigningUp(false)
+                      );
+                    }}
+                  >
+                    {isSigningUp ? 'Creating Account...' : 'Create Account'}
+                  </button>
+                </div>
+              </div>
               {error && (
                 <div>
                   <p className="text-red-700 dark:text-red-300">
-                    Error: {error.code}
+                    Error: {error.message ?? error.code}
                   </p>
-                </div>
-              )}
-              {isLinking && (
-                <div>
-                  <p className="text-red-700 dark:text-red-300">
-                    An account with this email already exists, please sign in
-                    with Google to link the two accounts:
-                  </p>
-                  <button
-                    type="button"
-                    className="btn mt-3 pl-3"
-                    onClick={handleLinkAccounts}
-                    // disabled={!firebaseApp || isSigningIn}
-                  >
-                    Link Accounts
-                  </button>
                 </div>
               )}
             </div>

@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { useFirebaseUser } from '../../../context/UserDataContext/UserDataContext';
+import { useCurrentUser } from '../../../context/UserDataContext/UserDataContext';
 import { useActiveGroup } from '../../../hooks/groups/useActiveGroup';
 import { usePostActions } from '../../../hooks/groups/usePostActions';
 import { GroupProblemData } from '../../../models/groups/problem';
@@ -22,14 +22,14 @@ export default function ProblemSubmissionInterface({
 }: {
   problem: GroupProblemData;
 }) {
-  const firebaseUser = useFirebaseUser();
+  const currentUser = useCurrentUser();
   const [submissionLink, setSubmissionLink] = React.useState('');
   const activeGroup = useActiveGroup();
   const { submitSubmissionLink } = usePostActions(
     activeGroup.activeGroupId!
   );
 
-  if (activeGroup.activeUserId !== firebaseUser?.uid) {
+  if (activeGroup.activeUserId !== currentUser?.uid) {
     // this suggests the parent is viewing the child's account
     // or a group owner is viewing the group as a group member. either way
     // don't allow submissions.

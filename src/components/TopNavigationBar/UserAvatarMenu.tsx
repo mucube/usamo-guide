@@ -1,10 +1,10 @@
 import { Menu, MenuButton, MenuItem, MenuItems } from '@headlessui/react';
-import type { User } from 'firebase/auth';
 import { Link } from 'gatsby';
 import React from 'react';
+import type { AppUser } from '../../context/UserDataContext/UserDataContext';
 
 export interface UserAvatarMenuProps {
-  firebaseUser: User;
+  currentUser: AppUser;
   onSignOut: () => void;
 }
 
@@ -18,7 +18,7 @@ export const UserAvatarMenu: React.FC<UserAvatarMenuProps> = props => {
               <span className="sr-only">Open user menu</span>
               <img
                 className="h-8 w-8 rounded-full"
-                src={props.firebaseUser.photoURL ?? undefined}
+                src={props.currentUser.photoURL ?? undefined}
                 alt="User photo URL"
               />
             </MenuButton>

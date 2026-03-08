@@ -1,21 +1,11 @@
 import classNames from 'classnames';
-import {
-  arrayUnion,
-  doc,
-  getDoc,
-  getFirestore,
-  setDoc,
-  updateDoc,
-} from 'firebase/firestore';
 import React, { useEffect, useState } from 'react';
 import toast from 'react-hot-toast';
-import { useFirebaseUser } from '../../context/UserDataContext/UserDataContext';
-import { useFirebaseApp } from '../../hooks/useFirebase';
+import { useCurrentUser } from '../../context/UserDataContext/UserDataContext';
+import { supabase } from '../../lib/supabaseClient';
 
 export default function Feedback({ videoId }): JSX.Element {
-  const firebaseApp = useFirebaseApp();
-  const db = getFirestore(firebaseApp);
-  const { uid } = useFirebaseUser()!;
+  const { uid } = useCurrentUser()!;
   const baseClasses =
     'rounded-full border h-8 w-8 text-xl transform transition focus:outline-hidden';
   const unselectedClasses = 'hover:scale-110 border-gray-200';
@@ -28,11 +18,17 @@ export default function Feedback({ videoId }): JSX.Element {
   const [showAdditionalFeedback, setShowAdditionalFeedback] = useState(false);
 
   useEffect(() => {
-    if (!db || !uid) return;
-    getDoc(doc(db, 'videos', videoId, 'feedback', uid)).then(data => {
-      setSelected(data.data()?.rating || null);
-    });
-  }, [uid, db]);
+    if (!uid) return;
+    supabase
+      .from('video_feedback')
+      .select('rating')
+      .eq('video_id', videoId)
+      .eq('user_id', uid)
+      .maybeSingle()
+      .then(({ data }) => {
+        setSelected(data?.rating || null);
+      });
+  }, [uid, videoId]);
 
   // Code to log video feedback to console
   // const group = useActiveGroup();
@@ -75,21 +71,30 @@ export default function Feedback({ videoId }): JSX.Element {
                 onClick={() => {
                   if (selected === key) {
                     setSelected(null);
-                    updateDoc(doc(db, 'videos', videoId, 'feedback', uid), {
-                      rating: null,
-                    });
+                    supabase
+                      .from('video_feedback')
+                      .upsert(
+                        {
+                          video_id: videoId,
+                          user_id: uid,
+                          rating: null,
+                        },
+                        { onConflict: 'video_id,user_id' }
+                      )
+                      .catch(() => null);
                   } else {
                     setSelected(key);
                     if (key == 'very_bad' || key == 'bad') {
                       setShowAdditionalFeedback(true);
                     }
                     toast.promise(
-                      setDoc(
-                        doc(db, 'videos', videoId, 'feedback', uid),
+                      supabase.from('video_feedback').upsert(
                         {
+                          video_id: videoId,
+                          user_id: uid,
                           rating: key,
                         },
-                        { merge: true }
+                        { onConflict: 'video_id,user_id' }
                       ),
                       {
                         loading: 'Submitting...',
@@ -129,13 +134,26 @@ export default function Feedback({ videoId }): JSX.Element {
             const originalComment = comment;
             setComment('');
             toast.promise(
-              setDoc(
-                doc(db, 'videos', videoId, 'feedback', uid),
-                {
-                  comments: arrayUnion(originalComment),
-                },
-                { merge: true }
-              ),
+              supabase
+                .from('video_feedback')
+                .select('comments')
+                .eq('video_id', videoId)
+                .eq('user_id', uid)
+                .maybeSingle()
+                .then(({ data }) => {
+                  const nextComments = [
+                    ...(data?.comments ?? []),
+                    originalComment,
+                  ];
+                  return supabase.from('video_feedback').upsert(
+                    {
+                      video_id: videoId,
+                      user_id: uid,
+                      comments: nextComments,
+                    },
+                    { onConflict: 'video_id,user_id' }
+                  );
+                }),
               {
                 loading: 'Submitting...',
                 success: 'Thanks for your comment!',

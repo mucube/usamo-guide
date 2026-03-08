@@ -34,7 +34,7 @@ import Layout from '../components/layout';
 import SEO from '../components/seo';
 import TopNavigationBar from '../components/TopNavigationBar/TopNavigationBar';
 import {
-  useFirebaseUser,
+  useCurrentUser,
   useIsUserDataLoaded,
 } from '../context/UserDataContext/UserDataContext';
 
@@ -55,23 +55,23 @@ const linkTextStyles =
   'text-blue-600 dark:text-blue-300 transition hover:text-purple-600 dark:hover:text-purple-300';
 
 export default function IndexPage({ path }): JSX.Element {
-  const firebaseUser = useFirebaseUser();
+  const currentUser = useCurrentUser();
   const loading = useIsUserDataLoaded();
   const location = useLocation();
   React.useEffect(() => {
     // User will normally be redirected to the dashboard if the user is logged in, but if user clicks the icon in the top left corner while on the dashboard, they will not be redirected.
     try {
-      if (firebaseUser && location.state.redirect) {
+      if (currentUser && location.state.redirect) {
         /* Whether or not the user should be redirected to the dashboard is stored in location.state.redirect, but if the user opens a link straight
         to the landing page, location.state.redirect will be undefined, causing a typeerror, this try catch statements accounts for that */
         navigate('/dashboard');
       }
     } catch (e) {
-      if (firebaseUser) {
+      if (currentUser) {
         navigate('/dashboard');
       }
     }
-  }, [firebaseUser, loading, location]);
+  }, [currentUser, loading, location]);
 
   return (
     <Layout>

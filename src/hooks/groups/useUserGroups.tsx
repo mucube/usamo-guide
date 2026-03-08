@@ -1,16 +1,8 @@
-import type { CollectionReference } from 'firebase/firestore';
-import {
-  collection,
-  getDocs,
-  getFirestore,
-  query,
-  where,
-} from 'firebase/firestore';
 import * as React from 'react';
 import { ReactElement, ReactNode } from 'react';
-import { useFirebaseUser } from '../../context/UserDataContext/UserDataContext';
+import { useCurrentUser } from '../../context/UserDataContext/UserDataContext';
+import { supabase } from '../../lib/supabaseClient';
 import { GroupData } from '../../models/groups/groups';
-import { useFirebaseApp } from '../useFirebase';
 
 const UserGroupsContext = React.createContext<{
   isLoading: boolean;
@@ -27,47 +19,63 @@ const UserGroupsProvider = ({
 }: {
   children: ReactNode;
 }): ReactElement => {
-  const firebaseUser = useFirebaseUser();
-  const [isLoading, setIsLoading] = React.useState(!!firebaseUser?.uid);
+  const currentUser = useCurrentUser();
+  const [isLoading, setIsLoading] = React.useState(!!currentUser?.uid);
   const [groups, setGroups] = React.useState<null | (GroupData | null)[]>(null);
   const [updateCtr, setUpdateCtr] = React.useState(0);
 
-  useFirebaseApp(
-    firebaseApp => {
-      if (!firebaseUser?.uid) {
-        setIsLoading(false);
-        setGroups(null);
-        return;
-      }
-      setIsLoading(true);
+  React.useEffect(() => {
+    if (!currentUser?.uid) {
+      setIsLoading(false);
+      setGroups(null);
+      return;
+    }
 
-      const queries = {
-        ownerIds: null,
-        memberIds: null,
-        adminIds: null,
-      };
+    let alive = true;
+    setIsLoading(true);
 
-      Object.keys(queries).forEach(key => {
-        getDocs(
-          query(
-            collection(
-              getFirestore(firebaseApp),
-              'groups'
-            ) as CollectionReference<GroupData>,
-            where(key, 'array-contains', firebaseUser?.uid)
-          )
-        ).then(snap => {
-          queries[key] = snap.docs.map(doc => ({ ...doc.data(), id: doc.id }));
+    const fetchGroups = async () => {
+      const [owners, admins, members] = await Promise.all([
+        supabase
+          .from('groups')
+          .select('*')
+          .contains('owner_ids', [currentUser.uid]),
+        supabase
+          .from('groups')
+          .select('*')
+          .contains('admin_ids', [currentUser.uid]),
+        supabase
+          .from('groups')
+          .select('*')
+          .contains('member_ids', [currentUser.uid]),
+      ]);
 
-          if (Object.keys(queries).every(x => queries[x] !== null)) {
-            setGroups(Object.values(queries).flat());
-            setIsLoading(false);
-          }
-        });
-      });
-    },
-    [firebaseUser?.uid, updateCtr]
-  );
+      if (!alive) return;
+
+      const allGroups = [
+        ...(owners.data ?? []),
+        ...(admins.data ?? []),
+        ...(members.data ?? []),
+      ].map(group => ({
+        id: group.id,
+        name: group.name,
+        description: group.description,
+        ownerIds: group.owner_ids ?? [],
+        adminIds: group.admin_ids ?? [],
+        memberIds: group.member_ids ?? [],
+        postOrdering: group.post_ordering ?? [],
+      })) as GroupData[];
+
+      setGroups(allGroups);
+      setIsLoading(false);
+    };
+
+    fetchGroups();
+
+    return () => {
+      alive = false;
+    };
+  }, [currentUser?.uid, updateCtr]);
 
   return (
     <UserGroupsContext.Provider

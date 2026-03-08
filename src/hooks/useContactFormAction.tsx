@@ -1,15 +1,13 @@
-import { getFunctions, httpsCallable } from 'firebase/functions';
 import { useCallback } from 'react';
-import { useFirebaseUser } from '../context/UserDataContext/UserDataContext';
-import { useFirebaseApp } from './useFirebase';
+import { useCurrentUser } from '../context/UserDataContext/UserDataContext';
+import { supabase } from '../lib/supabaseClient';
 
 export default function useContactFormAction() {
-  const firebaseApp = useFirebaseApp();
-  const firebaseUser = useFirebaseUser();
+  const currentUser = useCurrentUser();
 
   return useCallback(
     async ({ name, email, moduleName, url, lang, topic, message }) => {
-      if (!firebaseUser) {
+      if (!currentUser) {
         throw new Error('Must be logged in.');
       }
       if (!name) {
@@ -24,24 +22,23 @@ export default function useContactFormAction() {
       if (!message) {
         throw new Error('Please enter a message.');
       }
-      if (!firebaseApp) {
-        throw new Error('Too fast! Please wait ten seconds and try again.');
-      }
-      const submitProblemSuggestion = httpsCallable(
-        getFunctions(firebaseApp),
-        'submitContactForm'
+      const { data, error } = await supabase.functions.invoke(
+        'submit-contact-form',
+        {
+          body: {
+            name,
+            email,
+            moduleName,
+            url,
+            lang,
+            topic,
+            message,
+          },
+        }
       );
-
-      return submitProblemSuggestion({
-        name,
-        email,
-        moduleName,
-        url,
-        lang,
-        topic,
-        message,
-      });
+      if (error) throw error;
+      return data;
     },
-    [firebaseApp, firebaseUser]
+    [currentUser]
   );
 }

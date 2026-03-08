@@ -1,16 +1,5 @@
-import {
-  collection,
-  doc,
-  getDoc,
-  getDocs,
-  getFirestore,
-  limit,
-  orderBy,
-  query,
-  Timestamp,
-} from 'firebase/firestore';
 import React from 'react';
-import { useFirebaseApp } from '../useFirebase';
+import { supabase } from '../../lib/supabaseClient';
 
 export type LeaderboardEntry = {
   totalPoints: number;
@@ -25,7 +14,7 @@ export type LeaderboardEntry = {
         bestScore: number;
         bestScoreStatus: string;
         bestScoreSubmissionId: string;
-        bestScoreTimestamp: Timestamp;
+        bestScoreTimestamp: string;
       };
     };
   };
@@ -45,29 +34,44 @@ export default function useLeaderboardData({
   postId?: string;
   maxResults?: number;
 }): LeaderboardEntry[] | null {
-  const firebaseApp = useFirebaseApp();
   const [data, setData] = React.useState<LeaderboardEntry[] | null>(null);
   React.useEffect(() => {
-    if (!firebaseApp || !groupId) {
+    if (!groupId) {
       setData(null);
       return;
     }
-    const q = query(
-      collection(getFirestore(firebaseApp), `groups/${groupId}/leaderboard`),
-      orderBy(postId ? `${postId}.totalPoints` : 'totalPoints', 'desc'),
-      limit(maxResults)
-    );
     let alive = true;
-    getDocs(q).then(snap => {
+    const fetchLeaderboard = async () => {
+      const { data: rows, error } = await supabase
+        .from('group_leaderboard')
+        .select('*')
+        .eq('group_id', groupId)
+        .order('total_points', { ascending: false })
+        .limit(maxResults);
       if (!alive) return;
-      const newData: LeaderboardEntry[] = [];
-      snap.forEach(doc => newData.push(doc.data() as LeaderboardEntry));
-      setData(newData);
-    });
+      if (error) {
+        setData(null);
+        return;
+      }
+      const mapped = (rows ?? []).map(row => ({
+        totalPoints: row.total_points,
+        userInfo: row.user_info,
+        details: row.details ?? {},
+        ...(row.post_scores ?? {}),
+      })) as LeaderboardEntry[];
+      if (postId) {
+        mapped.sort(
+          (a, b) => (b[postId]?.totalPoints ?? 0) - (a[postId]?.totalPoints ?? 0)
+        );
+      }
+      setData(mapped);
+    };
+
+    fetchLeaderboard();
     return () => {
       alive = false;
     };
-  }, [firebaseApp, groupId, postId, maxResults]);
+  }, [groupId, postId, maxResults]);
 
   return data;
 }
@@ -76,24 +80,36 @@ export function useUserLeaderboardData(
   groupId: string,
   userId: string
 ): LeaderboardEntry | null {
-  const firebaseApp = useFirebaseApp();
   const [data, setData] = React.useState<LeaderboardEntry | null>(null);
   React.useEffect(() => {
-    if (!firebaseApp || !groupId || !userId) {
+    if (!groupId || !userId) {
       setData(null);
       return;
     }
     let alive = true;
-    getDoc(
-      doc(getFirestore(firebaseApp), `groups/${groupId}/leaderboard/${userId}`)
-    ).then(snap => {
-      if (!alive) return;
-      setData(snap.data() as LeaderboardEntry);
-    });
+    supabase
+      .from('group_leaderboard')
+      .select('*')
+      .eq('group_id', groupId)
+      .eq('user_id', userId)
+      .maybeSingle()
+      .then(({ data, error }) => {
+        if (!alive) return;
+        if (error || !data) {
+          setData(null);
+          return;
+        }
+        setData({
+          totalPoints: data.total_points,
+          userInfo: data.user_info,
+          details: data.details ?? {},
+          ...(data.post_scores ?? {}),
+        } as LeaderboardEntry);
+      });
     return () => {
       alive = false;
     };
-  }, [firebaseApp, groupId, userId]);
+  }, [groupId, userId]);
 
   return data;
 }

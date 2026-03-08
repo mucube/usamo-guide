@@ -1,5 +1,3 @@
-import { Timestamp } from 'firebase/firestore';
-
 export type GroupData = {
   id: string;
   name: string;
@@ -22,7 +20,7 @@ export type JoinGroupLink = {
   revoked: boolean;
   numUses: number;
   maxUses: number | null;
-  expirationTime: Timestamp | null;
+  expirationTime: string | null;
   usedBy: string[];
   author: string;
 };

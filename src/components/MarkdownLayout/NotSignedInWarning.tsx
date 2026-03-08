@@ -2,17 +2,17 @@ import * as React from 'react';
 import { useSignIn } from '../../context/SignInContext';
 import { useLastVisitInfo } from '../../context/UserDataContext/properties/lastVisit';
 import {
-  useFirebaseUser,
+  useCurrentUser,
   useIsUserDataLoaded,
 } from '../../context/UserDataContext/UserDataContext';
 
 export default function NotSignedInWarning() {
   const { signIn } = useSignIn();
-  const firebaseUser = useFirebaseUser();
+  const currentUser = useCurrentUser();
   const isLoaded = useIsUserDataLoaded();
   const { numPageviews } = useLastVisitInfo();
 
-  if (isLoaded && !firebaseUser && numPageviews > 1) {
+  if (isLoaded && !currentUser && numPageviews > 1) {
     return (
       <>
         <div className="bg-gray-50 sm:rounded-lg dark:bg-gray-900">

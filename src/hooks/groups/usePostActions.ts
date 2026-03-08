@@ -1,19 +1,7 @@
-import {
-  addDoc,
-  arrayRemove,
-  arrayUnion,
-  collection,
-  deleteField,
-  doc,
-  getFirestore,
-  serverTimestamp,
-  updateDoc,
-  writeBatch,
-} from 'firebase/firestore';
-import { useFirebaseUser } from '../../context/UserDataContext/UserDataContext';
+import { useCurrentUser } from '../../context/UserDataContext/UserDataContext';
+import { supabase } from '../../lib/supabaseClient';
 import { PostData } from '../../models/groups/posts';
 import { GroupProblemData } from '../../models/groups/problem';
-import { useFirebaseApp } from '../useFirebase';
 
 // Duplicated from online-judge... online-judge should be the only version of this
 export interface ProblemSubmissionRequestData {
@@ -23,22 +11,38 @@ export interface ProblemSubmissionRequestData {
   sourceCode: string;
   submissionID?: string; // if given, uses this as the submission ID. must be uuidv4
   wait?: boolean; // if true, request will wait until the submission finishes grading.
-  firebase?: {
-    idToken: string; // used to authenticate REST api
-    collectionPath: string;
+  supabase?: {
+    accessToken: string; // used to authenticate REST api
+    groupId: string;
+    postId: string;
+    problemId: string;
     userID: string;
   };
 }
 
 export function usePostActions(groupId: string) {
-  const firebaseApp = useFirebaseApp();
-  const firebaseUser = useFirebaseUser();
+  const currentUser = useCurrentUser();
 
   const updatePost = async (postId: string, updatedData: Partial<PostData>) => {
-    await updateDoc(
-      doc(getFirestore(firebaseApp), 'groups', groupId, 'posts', postId),
-      updatedData
-    );
+    await supabase
+      .from('group_posts')
+      .update({
+        name: updatedData.name,
+        timestamp: updatedData.timestamp,
+        is_published: updatedData.isPublished,
+        is_pinned: updatedData.isPinned,
+        body: updatedData.body,
+        is_deleted: updatedData.isDeleted,
+        type: updatedData.type,
+        points_per_problem: updatedData.pointsPerProblem,
+        problem_ordering: updatedData.problemOrdering,
+        due_at:
+          updatedData.type === 'assignment'
+            ? updatedData.dueTimestamp
+            : null,
+      })
+      .eq('id', postId)
+      .eq('group_id', groupId);
   };
 
   return {
@@ -58,47 +62,46 @@ export function usePostActions(groupId: string) {
               dueTimestamp: null,
             }),
       };
-      const firestore = getFirestore(firebaseApp);
-      const batch = writeBatch(firestore);
-      const docRef = doc(
-        collection(getFirestore(firebaseApp), 'groups', groupId, 'posts')
-      );
-      batch.set(docRef, { ...defaultPost, timestamp: serverTimestamp() });
-      batch.update(doc(firestore, 'groups', groupId), {
-        postOrdering: arrayUnion(docRef.id),
+      const { data, error } = await supabase
+        .from('group_posts')
+        .insert({
+          group_id: groupId,
+          name: defaultPost.name,
+          is_published: defaultPost.isPublished,
+          is_pinned: defaultPost.isPinned,
+          body: defaultPost.body,
+          is_deleted: defaultPost.isDeleted,
+          type: defaultPost.type,
+          points_per_problem: defaultPost.pointsPerProblem,
+          problem_ordering: defaultPost.problemOrdering,
+          due_at:
+            defaultPost.type === 'assignment' ? defaultPost.dueTimestamp : null,
+          timestamp: new Date().toISOString(),
+        })
+        .select('id')
+        .single();
+      if (error) throw error;
+      await supabase.rpc('groups_append_post_ordering', {
+        group_id: groupId,
+        post_id: data.id,
       });
-      await batch.commit();
-      return docRef.id;
+      return data.id;
     },
     deletePost: async (postId: string): Promise<void> => {
-      const firestore = getFirestore(firebaseApp);
-      const batch = writeBatch(firestore);
-
-      batch.update(doc(firestore, 'groups', groupId, 'posts', postId), {
-        isDeleted: true,
+      await supabase
+        .from('group_posts')
+        .update({ is_deleted: true })
+        .eq('id', postId)
+        .eq('group_id', groupId);
+      await supabase.rpc('groups_remove_post_ordering', {
+        group_id: groupId,
+        post_id: postId,
       });
-      batch.update(doc(firestore, 'groups', groupId), {
-        [`leaderboard.${postId}`]: deleteField(),
-        postOrdering: arrayRemove(postId),
-      });
-      return batch.commit();
     },
     updatePost,
     createNewProblem: async (post: PostData) => {
-      const firestore = getFirestore(firebaseApp);
-      const batch = writeBatch(firestore);
-      const docRef = doc(
-        collection(
-          getFirestore(firebaseApp),
-          'groups',
-          groupId,
-          'posts',
-          post.id!,
-          'problems'
-        )
-      );
       const defaultProblem: GroupProblemData = {
-        id: docRef.id,
+        id: '',
         postId: post.id!,
         name: 'Untitled Problem',
         body: '',
@@ -111,16 +114,32 @@ export function usePostActions(groupId: string) {
         guideProblemId: null,
         solutionReleaseMode: 'due-date',
       };
-      batch.set(docRef, defaultProblem);
-      batch.update(
-        doc(getFirestore(firebaseApp), 'groups', groupId, 'posts', post.id!),
-        {
-          [`pointsPerProblem.${docRef.id}`]: defaultProblem.points,
-          [`problemOrdering`]: arrayUnion(docRef.id),
-        }
-      );
-      await batch.commit();
-      return docRef.id;
+      const { data, error } = await supabase
+        .from('group_problems')
+        .insert({
+          group_id: groupId,
+          post_id: post.id,
+          name: defaultProblem.name,
+          body: defaultProblem.body,
+          source: defaultProblem.source,
+          points: defaultProblem.points,
+          difficulty: defaultProblem.difficulty,
+          hints: defaultProblem.hints,
+          solution: defaultProblem.solution,
+          is_deleted: defaultProblem.isDeleted,
+          guide_problem_id: defaultProblem.guideProblemId,
+          solution_release_mode: defaultProblem.solutionReleaseMode,
+          solution_release_at: null,
+        })
+        .select('id')
+        .single();
+      if (error) throw error;
+      await supabase.rpc('posts_append_problem_ordering', {
+        post_id: post.id,
+        problem_id: data.id,
+        points: defaultProblem.points,
+      });
+      return data.id;
     },
     saveProblem: async (post: PostData, problem: GroupProblemData) => {
       if (
@@ -132,79 +151,74 @@ export function usePostActions(groupId: string) {
         );
         return;
       }
-      const firestore = getFirestore(firebaseApp);
-      const batch = writeBatch(firestore);
-      const docRef = doc(
-        getFirestore(firebaseApp),
-        'groups',
-        groupId,
-        'posts',
-        post.id!,
-        'problems',
-        problem.id
-      );
-      // no clue why this throws a typescript error without it...
-      batch.update(docRef, problem as any);
-      batch.update(
-        doc(getFirestore(firebaseApp), 'groups', groupId, 'posts', post.id!),
-        {
-          [`pointsPerProblem.${docRef.id}`]: problem.points,
-        }
-      );
-      await batch.commit();
-      return docRef.id;
+      await supabase
+        .from('group_problems')
+        .update({
+          name: problem.name,
+          body: problem.body,
+          source: problem.source,
+          points: problem.points,
+          difficulty: problem.difficulty,
+          hints: problem.hints,
+          solution: problem.solution,
+          is_deleted: problem.isDeleted,
+          guide_problem_id: problem.guideProblemId,
+          solution_release_mode: problem.solutionReleaseMode,
+          solution_release_at:
+            problem.solutionReleaseMode === 'custom'
+              ? problem.solutionReleaseTimestamp
+              : null,
+        })
+        .eq('id', problem.id)
+        .eq('group_id', groupId)
+        .eq('post_id', post.id!);
+
+      await supabase.rpc('posts_update_problem_points', {
+        post_id: post.id,
+        problem_id: problem.id,
+        points: problem.points,
+      });
+      return problem.id;
     },
     deleteProblem: async (post: PostData, problemId: string) => {
-      const firestore = getFirestore(firebaseApp);
-      const batch = writeBatch(firestore);
-      batch.update(
-        doc(
-          firestore,
-          'groups',
-          groupId,
-          'posts',
-          post.id!,
-          'problems',
-          problemId
-        ),
-        {
-          isDeleted: true,
-        }
-      );
-      batch.update(doc(firestore, 'groups', groupId), {
-        [`leaderboard.${post.id}.${problemId}`]: deleteField(),
+      await supabase
+        .from('group_problems')
+        .update({ is_deleted: true })
+        .eq('id', problemId)
+        .eq('group_id', groupId)
+        .eq('post_id', post.id!);
+      await supabase.rpc('posts_remove_problem_ordering', {
+        post_id: post.id,
+        problem_id: problemId,
       });
-      batch.update(doc(firestore, 'groups', groupId, 'posts', post.id!), {
-        [`pointsPerProblem.${problemId}`]: deleteField(),
-        problemOrdering: arrayRemove(problemId),
-      });
-      await batch.commit();
     },
     updateProblemOrdering: async (postId: string, ordering: string[]) => {
-      const firestore = getFirestore(firebaseApp);
-      console.log('updating', ordering);
-      updateDoc(doc(firestore, 'groups', groupId, 'posts', postId), {
-        problemOrdering: ordering,
-      });
+      await supabase
+        .from('group_posts')
+        .update({ problem_ordering: ordering })
+        .eq('id', postId)
+        .eq('group_id', groupId);
     },
     submitSolution: async (
       submission: Omit<
         ProblemSubmissionRequestData,
-        'submissionID' | 'wait' | 'firebase'
+        'submissionID' | 'wait' | 'supabase'
       >,
       postId: string,
       problemId: string
     ) => {
-      const idToken = await firebaseUser!.getIdToken();
+      const idToken = await currentUser!.getIdToken();
       const reqData: ProblemSubmissionRequestData = {
         problemID: submission.problemID,
         language: submission.language,
         filename: submission.filename,
         sourceCode: submission.sourceCode,
-        firebase: {
-          collectionPath: `usamo-guide/databases/(default)/documents/groups/${groupId}/posts/${postId}/problems/${problemId}/submissions`,
-          idToken,
-          userID: firebaseUser!.uid,
+        supabase: {
+          accessToken: idToken,
+          groupId,
+          postId,
+          problemId,
+          userID: currentUser!.uid,
         },
       };
       const resp = await fetch(
@@ -228,27 +242,17 @@ export function usePostActions(groupId: string) {
       postId: string,
       problemId: string
     ) => {
-      const firestore = getFirestore(firebaseApp);
-      await addDoc(
-        collection(
-          firestore,
-          'groups',
-          groupId,
-          'posts',
-          postId,
-          'problems',
-          problemId,
-          'submissions'
-        ),
-        {
-          score: 1,
-          userID: firebaseUser!.uid,
-          type: 'submission-link',
-          verdict: 'AC',
-          timestamp: Date.now(),
-          link: submissionLink,
-        }
-      );
+      await supabase.from('group_problem_submissions').insert({
+        group_id: groupId,
+        post_id: postId,
+        problem_id: problemId,
+        score: 1,
+        user_id: currentUser!.uid,
+        type: 'submission-link',
+        verdict: 'AC',
+        timestamp: new Date().toISOString(),
+        link: submissionLink,
+      });
     },
   };
 }

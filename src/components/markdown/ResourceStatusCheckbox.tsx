@@ -5,7 +5,7 @@ import ConfettiContext from '../../context/ConfettiContext';
 import { useDarkMode } from '../../context/DarkModeContext';
 import MarkdownLayoutContext from '../../context/MarkdownLayoutContext';
 import {
-  replaceIllegalFirebaseCharacters,
+  replaceIllegalResourceKeyCharacters,
   useSetProgressOnModule,
   useSetProgressOnResource,
   useUserProgressOnModules,
@@ -159,7 +159,9 @@ export default function ResourcestatusCheckbox({
     setModuleProgress(markdownLayoutInfo.id, 'Reading');
   };
   const status: ResourceProgress =
-    userProgressOnResources[replaceIllegalFirebaseCharacters(resource.url!)] ||
+    userProgressOnResources[
+      replaceIllegalResourceKeyCharacters(resource.url!)
+    ] ||
     'Not Started';
   const color: { [key in ResourceProgress]: string } = {
     'Not Started': 'bg-gray-200 dark:bg-gray-700',

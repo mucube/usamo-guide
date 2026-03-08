@@ -1,14 +1,13 @@
 import { RouteComponentProps } from '@reach/router';
-import { getFunctions, httpsCallable } from 'firebase/functions';
 import { navigate } from 'gatsby';
 import * as React from 'react';
 import { useSignIn } from '../../context/SignInContext';
 import {
-  useFirebaseUser,
+  useCurrentUser,
   useIsUserDataLoaded,
 } from '../../context/UserDataContext/UserDataContext';
 import { useUserGroups } from '../../hooks/groups/useUserGroups';
-import { useFirebaseApp } from '../../hooks/useFirebase';
+import { supabase } from '../../lib/supabaseClient';
 import Layout from '../layout';
 import SEO from '../seo';
 import TopNavigationBar from '../TopNavigationBar/TopNavigationBar';
@@ -24,7 +23,7 @@ const getQuery = name => {
 };
 
 const JoinGroupPage = (props: RouteComponentProps) => {
-  const firebaseUser = useFirebaseUser();
+  const currentUser = useCurrentUser();
   const isLoaded = useIsUserDataLoaded();
   const { signIn } = useSignIn();
   const [groupName, setGroupName] = React.useState<string | null>(null);
@@ -34,50 +33,44 @@ const JoinGroupPage = (props: RouteComponentProps) => {
   } | null>(null);
   const [isLoading, setIsLoading] = React.useState(true);
   const [isJoining, setIsJoining] = React.useState(false);
-  const firebaseApp = useFirebaseApp();
   const userGroups = useUserGroups();
 
   const joinKey = typeof window === 'undefined' ? '' : getQuery('key');
-  const showLoading = isLoading || !isLoaded || !firebaseApp;
-  const showNotSignedInMessage = !showLoading && !firebaseUser?.uid;
+  const showLoading = isLoading || !isLoaded;
+  const showNotSignedInMessage = !showLoading && !currentUser?.uid;
 
-  useFirebaseApp(
-    firebaseApp => {
-      setError(null);
-      setIsLoading(true);
-      httpsCallable(
-        getFunctions(firebaseApp),
-        'groups-getJoinKeyInfo'
-      )({
-        key: joinKey,
+  React.useEffect(() => {
+    setError(null);
+    setIsLoading(true);
+    supabase.functions
+      .invoke('groups-get-join-key-info', {
+        body: { key: joinKey },
       })
-        .then(
-          ({
-            data,
-          }: {
-            data: {
-              success: boolean;
-              errorCode?: string;
-              message?: string;
-              name?: string;
-            };
-          }) => {
-            if (data.success) {
-              setGroupName(data.name ?? null);
-            } else {
-              setError({ errorCode: data.errorCode, message: data.message });
-            }
+      .then(
+        ({
+          data,
+        }: {
+          data: {
+            success: boolean;
+            errorCode?: string;
+            message?: string;
+            name?: string;
+          };
+        }) => {
+          if (data.success) {
+            setGroupName(data.name ?? null);
+          } else {
+            setError({ errorCode: data.errorCode, message: data.message });
           }
-        )
-        .catch(e => {
-          setError(e);
-        })
-        .finally(() => {
-          setIsLoading(false);
-        });
-    },
-    [joinKey]
-  );
+        }
+      )
+      .catch(e => {
+        setError(e);
+      })
+      .finally(() => {
+        setIsLoading(false);
+      });
+  }, [joinKey]);
 
   return (
     <Layout>
@@ -126,12 +119,10 @@ const JoinGroupPage = (props: RouteComponentProps) => {
                   type="button"
                   onClick={() => {
                     setIsJoining(true);
-                    httpsCallable(
-                      getFunctions(firebaseApp),
-                      'groups-join'
-                    )({
-                      key: joinKey,
-                    })
+                    supabase.functions
+                      .invoke('groups-join', {
+                        body: { key: joinKey },
+                      })
                       .then(
                         ({
                           data,

@@ -1,5 +1,4 @@
 import { Dialog, DialogBackdrop, DialogPanel } from '@headlessui/react';
-import { Timestamp } from 'firebase/firestore';
 import * as React from 'react';
 import Flatpickr from 'react-flatpickr';
 import { JoinGroupLink } from '../../../models/groups/groups';
@@ -158,7 +157,7 @@ export default function EditJoinLinkModal({
                           onChange={b =>
                             editLink({
                               expirationTime: b
-                                ? Timestamp.fromDate(initialExpirationTime)
+                                ? initialExpirationTime.toISOString()
                                 : null,
                             })
                           }
@@ -191,10 +190,14 @@ export default function EditJoinLinkModal({
                                   ].join('\\\\'),
                                 enableTime: true,
                               }}
-                              value={link.expirationTime?.toDate()}
+                              value={
+                                link.expirationTime
+                                  ? new Date(link.expirationTime)
+                                  : undefined
+                              }
                               onChange={date =>
                                 editLink({
-                                  expirationTime: Timestamp.fromDate(date[0]),
+                                  expirationTime: date[0].toISOString(),
                                 })
                               }
                               className="input"

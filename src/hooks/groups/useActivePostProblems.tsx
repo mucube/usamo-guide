@@ -1,17 +1,9 @@
-import type { CollectionReference } from 'firebase/firestore';
-import {
-  collection,
-  getFirestore,
-  onSnapshot,
-  query,
-  where,
-} from 'firebase/firestore';
 import * as React from 'react';
 import { ReactElement, ReactNode } from 'react';
 import toast from 'react-hot-toast';
-import { useFirebaseUser } from '../../context/UserDataContext/UserDataContext';
+import { useCurrentUser } from '../../context/UserDataContext/UserDataContext';
+import { supabase } from '../../lib/supabaseClient';
 import { GroupProblemData } from '../../models/groups/problem';
-import { useFirebaseApp } from '../useFirebase';
 import { useActiveGroup } from './useActiveGroup';
 type ActivePostProblemsContext = {
   activePostId?: string;
@@ -29,49 +21,77 @@ export function ActivePostProblemsProvider({
   children: ReactNode;
 }): ReactElement {
   const activeGroup = useActiveGroup();
-  const firebaseUser = useFirebaseUser();
+  const currentUser = useCurrentUser();
   const [activePostId, setActivePostId] = React.useState<string>();
   const [isLoading, setIsLoading] = React.useState(true);
   const [problems, setProblems] = React.useState<GroupProblemData[]>([]);
 
-  useFirebaseApp(
-    firebaseApp => {
-      setIsLoading(true);
-      setProblems([]);
-      if (!activePostId || !firebaseUser?.uid) {
+  React.useEffect(() => {
+    setIsLoading(true);
+    setProblems([]);
+    if (!activePostId || !currentUser?.uid) {
+      return;
+    }
+    if (!activeGroup.activeGroupId!) {
+      throw new Error('Cannot get post problems without being in an active group');
+    }
+
+    let alive = true;
+
+    const fetchProblems = async () => {
+      const { data, error } = await supabase
+        .from('group_problems')
+        .select('*')
+        .eq('group_id', activeGroup.activeGroupId)
+        .eq('post_id', activePostId)
+        .eq('is_deleted', false);
+
+      if (!alive) return;
+      if (error) {
+        toast.error(error.message);
         return;
       }
-      if (!activeGroup.activeGroupId!) {
-        throw new Error(
-          'Cannot get post problems without being in an active group'
-        );
-      }
-
-      const q = query(
-        collection(
-          getFirestore(firebaseApp),
-          'groups',
-          activeGroup.activeGroupId!,
-          'posts',
-          activePostId,
-          'problems'
-        ) as CollectionReference<GroupProblemData>,
-        where('isDeleted', '==', false)
+      setProblems(
+        (data ?? []).map(problem => ({
+          id: problem.id,
+          postId: problem.post_id,
+          name: problem.name,
+          body: problem.body,
+          source: problem.source,
+          points: problem.points,
+          difficulty: problem.difficulty,
+          hints: problem.hints ?? [],
+          solution: problem.solution,
+          isDeleted: problem.is_deleted,
+          guideProblemId: problem.guide_problem_id,
+          solutionReleaseMode: problem.solution_release_mode,
+          solutionReleaseTimestamp: problem.solution_release_at,
+        })) as GroupProblemData[]
       );
-      onSnapshot(q, {
-        next: snap => {
-          setProblems(
-            snap.docs.map(doc => ({ doc_id: doc.id, ...doc.data() }))
-          );
-          setIsLoading(false);
+      setIsLoading(false);
+    };
+
+    fetchProblems();
+
+    const channel = supabase
+      .channel(`group_problems_${activeGroup.activeGroupId}_${activePostId}`)
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'group_problems',
+          filter: `group_id=eq.${activeGroup.activeGroupId}`,
         },
-        error: error => {
-          toast.error(error.message);
-        },
-      });
-    },
-    [firebaseUser?.uid, activePostId, activeGroup.activeGroupId!]
-  );
+        () => fetchProblems()
+      )
+      .subscribe();
+
+    return () => {
+      alive = false;
+      supabase.removeChannel(channel);
+    };
+  }, [currentUser?.uid, activePostId, activeGroup.activeGroupId!]);
 
   return (
     <ActivePostProblemsContext.Provider

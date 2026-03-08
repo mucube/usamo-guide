@@ -1,37 +1,25 @@
-import {
-  collection,
-  CollectionReference,
-  getDocs,
-  getFirestore,
-} from '@firebase/firestore';
 import React, { useState } from 'react';
-import { useFirebaseUser } from '../../../context/UserDataContext/UserDataContext';
-import { useFirebaseApp } from '../../../hooks/useFirebase';
+import { useCurrentUser } from '../../../context/UserDataContext/UserDataContext';
+import { supabase } from '../../../lib/supabaseClient';
 import { GroupData } from '../../../models/groups/groups';
 import { GroupCard } from './GroupCard';
 
 export default function AdminViewAllGroups(): JSX.Element {
-  const firebaseUser = useFirebaseUser();
+  const currentUser = useCurrentUser();
   const [groups, setGroups] = useState<GroupData[] | null>(null);
 
-  useFirebaseApp(
-    firebaseApp => {
-      if (!firebaseUser?.uid) {
-        setGroups(null);
-        return;
-      }
-
-      getDocs(
-        collection(
-          getFirestore(firebaseApp),
-          'groups'
-        ) as CollectionReference<GroupData>
-      ).then(result => {
-        setGroups(result.docs.map(doc => ({ ...doc.data(), id: doc.id })));
+  React.useEffect(() => {
+    if (!currentUser?.uid) {
+      setGroups(null);
+      return;
+    }
+    supabase
+      .from('groups')
+      .select('*')
+      .then(({ data }) => {
+        setGroups((data ?? []) as GroupData[]);
       });
-    },
-    [firebaseUser?.uid]
-  );
+  }, [currentUser?.uid]);
 
   return (
     <>

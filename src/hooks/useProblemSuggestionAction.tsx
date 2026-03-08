@@ -1,10 +1,7 @@
-import { getFunctions, httpsCallable } from 'firebase/functions';
 import { useCallback } from 'react';
-import { useFirebaseApp } from './useFirebase';
+import { supabase } from '../lib/supabaseClient';
 
 export default function useProblemSuggestionAction() {
-  const firebaseApp = useFirebaseApp();
-
   return useCallback(
     async ({
       name,
@@ -27,27 +24,27 @@ export default function useProblemSuggestionAction() {
       if (!difficulty) {
         throw new Error('Please select a difficulty');
       }
-      if (!firebaseApp) {
-        throw new Error('Too fast! Please wait ten seconds and try again.');
-      }
-      const submitProblemSuggestion = httpsCallable<any, any>(
-        getFunctions(firebaseApp),
-        'submitProblemSuggestion'
+      const { data, error } = await supabase.functions.invoke(
+        'submit-problem-suggestion',
+        {
+          body: {
+            name,
+            link,
+            difficulty,
+            tags,
+            additionalNotes,
+            problemTableLink,
+            moduleName,
+            section,
+            problemListName,
+            source,
+            filePath,
+          },
+        }
       );
-      return submitProblemSuggestion({
-        name,
-        link,
-        difficulty,
-        tags,
-        additionalNotes,
-        problemTableLink,
-        moduleName,
-        section,
-        problemListName,
-        source,
-        filePath,
-      });
+      if (error) throw error;
+      return data;
     },
-    [firebaseApp]
+    []
   );
 }

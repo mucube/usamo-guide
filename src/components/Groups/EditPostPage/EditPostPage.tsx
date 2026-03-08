@@ -1,4 +1,3 @@
-import { Timestamp } from 'firebase/firestore';
 import { Link, navigate } from 'gatsby';
 import * as React from 'react';
 import { useReducer } from 'react';
@@ -158,11 +157,11 @@ export default function EditPostPage(props) {
                         ].join('\\\\'),
                       enableTime: true,
                     }}
-                    value={post.timestamp?.toDate()}
+                    value={post.timestamp ? new Date(post.timestamp) : undefined}
                     onChange={date =>
                       editPost({
                         timestamp: date[0]
-                          ? Timestamp.fromDate(date[0])
+                          ? date[0].toISOString()
                           : undefined,
                       })
                     }
@@ -193,12 +192,20 @@ export default function EditPostPage(props) {
                             ).split(''),
                           ].join('\\\\'),
                         enableTime: true,
-                        minDate: post.timestamp?.toDate(),
+                        minDate: post.timestamp
+                          ? new Date(post.timestamp)
+                          : undefined,
                       }}
-                      value={post.dueTimestamp?.toDate()}
+                      value={
+                        post.dueTimestamp
+                          ? new Date(post.dueTimestamp)
+                          : undefined
+                      }
                       onChange={date =>
                         editPost({
-                          dueTimestamp: Timestamp.fromDate(date[0]),
+                          dueTimestamp: date[0]
+                            ? date[0].toISOString()
+                            : null,
                         })
                       }
                       className="input"

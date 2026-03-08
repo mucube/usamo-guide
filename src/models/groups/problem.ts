@@ -1,5 +1,3 @@
-import { Timestamp } from 'firebase/firestore';
-
 export interface ProblemData {
   id: string;
   postId: string;
@@ -21,7 +19,7 @@ export type GroupProblemData = ProblemData &
     | {
         guideProblemId: string;
         solutionReleaseMode: 'custom';
-        solutionReleaseTimestamp: Timestamp;
+        solutionReleaseTimestamp: string;
       }
   );
 
@@ -81,7 +79,7 @@ export type ExecutionVerdict =
   | 'CE'
   | 'IE'; // IE is internal error
 
-export type FirebaseSubmission =
+export type GroupSubmission =
   | {
       id?: string;
       language: string;
@@ -91,7 +89,7 @@ export type FirebaseSubmission =
       userID: string;
       type: string;
       verdict: string;
-      timestamp: any; // milliseconds
+      timestamp: string;
     }
   | {
       id?: string;
@@ -99,7 +97,7 @@ export type FirebaseSubmission =
       userID: string;
       type: 'submission-link';
       verdict: string;
-      timestamp: any;
+      timestamp: string;
       link: string;
     };
 
@@ -152,20 +150,20 @@ export const submissionCircleBorderColor: {
   Pending: 'bg-gray-100 dark:bg-gray-800',
 };
 
-export const getSubmissionTimestampString = (submission: FirebaseSubmission) =>
+export const getSubmissionTimestampString = (submission: GroupSubmission) =>
   new Date(submission?.timestamp).toString().substr(0, 24);
-export const getSubmissionStatus = (submission: FirebaseSubmission) => {
+export const getSubmissionStatus = (submission: GroupSubmission) => {
   return submission.verdict;
 };
 export const getSubmissionEarnedPoints = (
-  submission: FirebaseSubmission,
+  submission: GroupSubmission,
   problem: ProblemData
 ) => {
   return parseFloat((submission.score * problem.points).toFixed(1));
 };
 export const getEarnedPointsForProblem = (
   problem: ProblemData,
-  submissions: FirebaseSubmission[]
+  submissions: GroupSubmission[]
 ) => {
   return submissions.reduce(
     (oldScore, submission) =>

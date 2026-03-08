@@ -17,18 +17,17 @@ export function createUserDataGetter<ReturnValue>(
  * means), and returns an object:
  * - the localStorageUpdate key holds changes that will be shallowly merged with the
  *   old userData object and written back to localStorage, if the user isn't logged in
- * - the firebaseUpdate key holds changes that will be passed into firestore's
- *   updateDoc() function, if the user is logged in
+ * - the remoteUpdate key holds changes that will be written to Supabase
+ *   (user_data JSON), if the user is logged in
  *
  * If the user is not logged in (ie. the localStorageUpdate path), the "latest" copy
  * of userData is guaranteed to be the latest.
  *
- * If the user is logged in to Firebase, the updateFunc is
- * given a *probably latest* copy userData (since
- * firestore theoretically will keep our userData object up to date).
+ * If the user is logged in, the updateFunc is given a *probably latest* copy
+ * of userData (since Supabase realtime should keep our userData object up to date).
  * It's NOT guaranteed to be the latest, since there could be
  * network failures or race conditions, and we are NOT wrapping this
- * in a firebase transaction for the sake of speed. For our use
+ * in a transaction for the sake of speed. For our use
  * cases, it's fine for userData to possibly be a bit outdated, since none
  * of our updates are destructive / depend on previous userData except for
  * consecutiveVisits, which isn't too bad to lose.
@@ -41,7 +40,7 @@ export function createUserDataMutation<T extends unknown[]>(
     ...updatePayload: T
   ) => {
     localStorageUpdate: Partial<UserData>;
-    firebaseUpdate: object;
+    remoteUpdate: object;
   }
 ): () => (...updatePayload: T) => void {
   return () => {
@@ -56,7 +55,7 @@ export function createUserDataMutation<T extends unknown[]>(
 
 /**
  * Helper function to create a "simple" user data mutation hook,
- * where the localStorageUpdate and the firebaseUpdate objects are the same.
+ * where the localStorageUpdate and the remoteUpdate objects are the same.
  */
 export function createSimpleUserDataMutation<T extends unknown[]>(
   mutation: (userData: UserData, ...updatePayload: T) => Partial<UserData>
@@ -65,7 +64,7 @@ export function createSimpleUserDataMutation<T extends unknown[]>(
     const changes = mutation(userData, ...updatePayload);
     return {
       localStorageUpdate: changes,
-      firebaseUpdate: changes,
+      remoteUpdate: changes,
     };
   });
 }

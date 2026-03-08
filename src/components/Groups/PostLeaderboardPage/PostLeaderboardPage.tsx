@@ -1,13 +1,11 @@
-import type { DocumentReference } from 'firebase/firestore';
-import { doc, getDoc, getFirestore } from 'firebase/firestore';
 import React from 'react';
 import toast from 'react-hot-toast';
 import { useActiveGroup } from '../../../hooks/groups/useActiveGroup';
 import { useActivePostProblems } from '../../../hooks/groups/useActivePostProblems';
 import useLeaderboardData from '../../../hooks/groups/useLeaderboardData';
 import { usePost } from '../../../hooks/groups/usePost';
-import { useFirebaseApp } from '../../../hooks/useFirebase';
-import { FirebaseSubmission } from '../../../models/groups/problem';
+import { supabase } from '../../../lib/supabaseClient';
+import { GroupSubmission } from '../../../models/groups/problem';
 import Layout from '../../layout';
 import SEO from '../../seo';
 import TopNavigationBar from '../../TopNavigationBar/TopNavigationBar';
@@ -25,7 +23,6 @@ export default function PostLeaderboardPage(props) {
   const post = usePost(postId);
   if (!post) throw new Error('Post not found');
   const { problems } = useActivePostProblems();
-  const firebaseApp = useFirebaseApp();
   const leaderboard = useLeaderboardData({
     groupId: activeGroup.activeGroupId!,
     postId: postId,
@@ -37,21 +34,31 @@ export default function PostLeaderboardPage(props) {
     problemId: string,
     submissionId: string
   ) => {
-    getDoc(
-      doc(
-        getFirestore(firebaseApp),
-        'groups',
-        activeGroup.activeGroupId!,
-        'posts',
-        postId,
-        'problems',
-        problemId,
-        'submissions',
-        submissionId
-      ) as DocumentReference<FirebaseSubmission>
-    )
-      .then(doc => {
-        const submission = { ...doc.data(), id: doc.id } as FirebaseSubmission;
+    supabase
+      .from('group_problem_submissions')
+      .select('*')
+      .eq('group_id', activeGroup.activeGroupId)
+      .eq('post_id', postId)
+      .eq('problem_id', problemId)
+      .eq('id', submissionId)
+      .maybeSingle()
+      .then(({ data, error }) => {
+        if (error || !data) {
+          toast.error("Couldn't get submission: " + error?.message);
+          return;
+        }
+        const submission = {
+          id: data.id,
+          language: data.language,
+          problemID: data.problem_id,
+          score: data.score,
+          submissionID: data.submission_id,
+          userID: data.user_id,
+          type: data.type,
+          verdict: data.verdict,
+          timestamp: data.timestamp,
+          link: data.link,
+        } as GroupSubmission;
         openProblemSubmissionPopup(submission);
       })
       .catch(e => {

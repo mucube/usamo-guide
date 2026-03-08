@@ -1,11 +1,10 @@
 import dayjs from 'dayjs';
-import { Timestamp } from 'firebase/firestore';
-import { FirebaseSubmission, ProblemData } from './problem';
+import { GroupSubmission, ProblemData } from './problem';
 
 export type PostData = {
   id?: string;
   name: string;
-  timestamp: Timestamp;
+  timestamp: string;
   /**
    * Markdown string of the post content
    */
@@ -29,7 +28,7 @@ export type PostData = {
     }
   | {
       type: 'assignment';
-      dueTimestamp: Timestamp | null;
+      dueTimestamp: string | null;
     }
 );
 
@@ -46,28 +45,28 @@ export const getPostTimestampString = (post: PostData) => {
 };
 export const getPostDateString = (post: PostData) =>
   post.timestamp
-    ? dayjs(post.timestamp.toDate()).format('MMMM DD h:mma')
+    ? dayjs(new Date(post.timestamp)).format('MMMM DD h:mma')
     : null;
 export const getPostDueDateString = (post: PostData) =>
   post.type === 'assignment' && post.dueTimestamp
-    ? dayjs(post.dueTimestamp.toDate()).format('MMMM DD h:mma')
+    ? dayjs(new Date(post.dueTimestamp)).format('MMMM DD h:mma')
     : null;
 export const getTotalPointsFromProblems = (problems: ProblemData[]) =>
   problems.reduce((acc, cur) => acc + cur.points, 0);
-export const getSubmissionTimestampString = (submission: FirebaseSubmission) =>
-  dayjs(submission?.timestamp?.toDate()).format('MMMM DD h:mma');
-export const getSubmissionStatus = (submission: FirebaseSubmission) => {
+export const getSubmissionTimestampString = (submission: GroupSubmission) =>
+  dayjs(new Date(submission?.timestamp)).format('MMMM DD h:mma');
+export const getSubmissionStatus = (submission: GroupSubmission) => {
   return submission.verdict;
 };
 export const getSubmissionEarnedPoints = (
-  submission: FirebaseSubmission,
+  submission: GroupSubmission,
   problem: ProblemData
 ) => {
   return Math.round(submission.score * problem.points);
 };
 export const getEarnedPointsForProblem = (
   problem: ProblemData,
-  submissions: FirebaseSubmission[]
+  submissions: GroupSubmission[]
 ) => {
   return submissions.reduce(
     (oldScore, submission) =>
@@ -87,5 +86,8 @@ export const sortPostsComparator = (a: PostData, b: PostData): number => {
     return (a.isPinned ? 1 : 0) - (b.isPinned ? 1 : 0);
   }
 
-  return (a.timestamp?.toMillis() || 0) - (b.timestamp?.toMillis() || 0);
+  return (
+    (a.timestamp ? new Date(a.timestamp).getTime() : 0) -
+    (b.timestamp ? new Date(b.timestamp).getTime() : 0)
+  );
 };

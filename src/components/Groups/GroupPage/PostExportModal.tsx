@@ -4,21 +4,10 @@ import {
   DialogPanel,
   DialogTitle,
 } from '@headlessui/react';
-import {
-  arrayUnion,
-  collection,
-  CollectionReference,
-  doc,
-  getDocs,
-  getFirestore,
-  query,
-  serverTimestamp,
-  writeBatch,
-} from 'firebase/firestore';
 import React, { useState } from 'react';
-import { useFirebaseUser } from '../../../context/UserDataContext/UserDataContext';
+import { useCurrentUser } from '../../../context/UserDataContext/UserDataContext';
 import { useUserGroups } from '../../../hooks/groups/useUserGroups';
-import { useFirebaseApp } from '../../../hooks/useFirebase';
+import { supabase } from '../../../lib/supabaseClient';
 import { GroupData } from '../../../models/groups/groups';
 import { PostData } from '../../../models/groups/posts';
 import { GroupProblemData } from '../../../models/groups/problem';
@@ -29,26 +18,20 @@ export default function PostExportModal(props: {
   post: PostData;
   group: GroupData;
 }) {
-  const firebaseApp = useFirebaseApp();
-  const firebaseUser = useFirebaseUser();
+  const currentUser = useCurrentUser();
   const groups = useUserGroups();
   const [problems, setProblems] = React.useState<GroupProblemData[]>([]);
   const [groupsUsedMap, setGroupsUsedMap] = useState(new Map());
 
   async function handleGroupExportChange(g: GroupData) {
-    const q = query(
-      collection(
-        getFirestore(firebaseApp),
-        'groups',
-        props.group.id,
-        'posts',
-        props.post.id!,
-        'problems'
-      ) as CollectionReference<GroupProblemData>
-    );
-
-    const snap = await getDocs(q);
-    setProblems(snap.docs.map(doc => ({ ...doc.data(), id: doc.id })));
+    const { data, error } = await supabase
+      .from('group_problems')
+      .select('*')
+      .eq('group_id', props.group.id)
+      .eq('post_id', props.post.id!);
+    if (!error) {
+      setProblems((data ?? []) as GroupProblemData[]);
+    }
 
     console.log(g.name);
     if (groupsUsedMap.has(g.id)) {
@@ -87,48 +70,69 @@ export default function PostExportModal(props: {
 
     console.log('gm ' + groupsUsedMap.size);
     console.log('Problem load ' + problems.length);
-    groupsUsedMap.forEach((value: MapData, key: string) => {
-      if (value.used) {
-        const firestore = getFirestore(firebaseApp);
-        const batch = writeBatch(firestore);
-        const docRef = doc(
-          collection(getFirestore(firebaseApp), 'groups', key, 'posts')
-        );
+    for (const [key, value] of groupsUsedMap.entries()) {
+      if (!value.used) continue;
 
-        batch.set(docRef, { ...defaultPost, timestamp: serverTimestamp() });
-        batch.update(doc(firestore, 'groups', key), {
-          postOrdering: arrayUnion(docRef.id),
-        });
+      const { data: postData, error: postError } = await supabase
+        .from('group_posts')
+        .insert({
+          group_id: key,
+          name: defaultPost.name,
+          is_published: defaultPost.isPublished,
+          is_pinned: defaultPost.isPinned,
+          body: defaultPost.body,
+          is_deleted: defaultPost.isDeleted,
+          type: defaultPost.type,
+          points_per_problem: {},
+          problem_ordering: [],
+          due_at:
+            defaultPost.type === 'assignment' ? defaultPost.dueTimestamp : null,
+          timestamp: new Date().toISOString(),
+        })
+        .select('id')
+        .single();
+      if (postError) continue;
 
-        problems.map(async problem => {
-          const docRef2 = doc(
-            collection(
-              getFirestore(firebaseApp),
-              'groups',
-              key,
-              'posts',
-              docRef.id,
-              'problems'
-            )
-          );
+      await supabase.rpc('groups_append_post_ordering', {
+        group_id: key,
+        post_id: postData.id,
+      });
 
-          problem.id = docRef2.id;
-          problem.isDeleted = false;
-          problem.postId = docRef.id;
-
-          batch.set(docRef2, { ...(problem as any) });
-          batch.update(
-            doc(getFirestore(firebaseApp), 'groups', key, 'posts', docRef.id),
-            {
-              [`pointsPerProblem.${docRef2.id}`]: problem.points,
-              [`problemOrdering`]: arrayUnion(docRef2.id),
-            }
-          );
-          console.log(problem);
-        });
-        batch.commit();
+      const newProblemOrdering: string[] = [];
+      const pointsPerProblem: Record<string, number> = {};
+      for (const problem of problems) {
+        const { data: problemRow, error: problemError } = await supabase
+          .from('group_problems')
+          .insert({
+            group_id: key,
+            post_id: postData.id,
+            name: problem.name,
+            body: problem.body,
+            source: problem.source,
+            points: problem.points,
+            difficulty: problem.difficulty,
+            hints: problem.hints,
+            solution: problem.solution,
+            is_deleted: false,
+            guide_problem_id: problem.guideProblemId,
+            solution_release_mode: problem.solutionReleaseMode,
+            solution_release_at: problem.solutionReleaseTimestamp ?? null,
+          })
+          .select('id')
+          .single();
+        if (problemError) continue;
+        newProblemOrdering.push(problemRow.id);
+        pointsPerProblem[problemRow.id] = problem.points;
       }
-    });
+
+      await supabase
+        .from('group_posts')
+        .update({
+          problem_ordering: newProblemOrdering,
+          points_per_problem: pointsPerProblem,
+        })
+        .eq('id', postData.id);
+    }
     props.onClose();
   }
 
@@ -171,7 +175,7 @@ export default function PostExportModal(props: {
                         (groups.data && groups.data.length > 0 ? (
                           groups.data.map(group =>
                             group &&
-                            group.ownerIds.includes(firebaseUser!.uid) ? (
+                            group.ownerIds.includes(currentUser!.uid) ? (
                               <div key={group.id}>
                                 <label className="inline-flex items-center">
                                   <input

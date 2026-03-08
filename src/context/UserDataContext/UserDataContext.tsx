@@ -1,17 +1,9 @@
-import { getAuth, onAuthStateChanged, signOut, User } from 'firebase/auth';
-import {
-  doc,
-  getFirestore,
-  onSnapshot,
-  serverTimestamp,
-  setDoc,
-  updateDoc,
-} from 'firebase/firestore';
+import type { Session, User as SupabaseUser } from '@supabase/supabase-js';
 import debounce from 'lodash/debounce';
 import * as React from 'react';
 import { createContext, ReactNode, useMemo, useRef, useState } from 'react';
 import toast from 'react-hot-toast';
-import { useFirebaseApp } from '../../hooks/useFirebase';
+import { supabase } from '../../lib/supabaseClient';
 import { ModuleProgress } from '../../models/module';
 import { ProblemProgress } from '../../models/problem';
 import { ResourceProgress } from '../../models/resource';
@@ -20,7 +12,51 @@ import { Language, Theme } from './properties/simpleProperties';
 import { getLangFromUrl, updateLangURL } from './userLangQueryVariableUtils';
 import { UserPermissionsContextProvider } from './UserPermissionsContext';
 
-// What's actually stored in local storage / firebase
+export type AppUser = {
+  id: string;
+  uid: string;
+  email: string | null;
+  displayName: string | null;
+  photoURL: string | null;
+  providerData: { providerId: string }[];
+  getIdToken: () => Promise<string>;
+};
+
+type UserProfileRow = {
+  display_name: string | null;
+  avatar_url: string | null;
+  is_admin: boolean | null;
+  can_moderate: boolean | null;
+  can_create_groups: boolean | null;
+};
+
+const mapProviderData = (user: SupabaseUser): { providerId: string }[] => {
+  return (user.identities ?? []).map(identity => ({
+    providerId: identity.provider,
+  }));
+};
+
+const buildAppUser = (
+  session: Session | null,
+  profile: UserProfileRow | null
+): AppUser | null => {
+  if (!session?.user) return null;
+  const user = session.user;
+  const displayName =
+    profile?.display_name ?? user.user_metadata?.full_name ?? null;
+  const photoURL = profile?.avatar_url ?? user.user_metadata?.avatar_url ?? null;
+  return {
+    id: user.id,
+    uid: user.id,
+    email: user.email ?? null,
+    displayName,
+    photoURL,
+    providerData: mapProviderData(user),
+    getIdToken: async () => session.access_token ?? '',
+  };
+};
+
+// What's actually stored in local storage / database
 export type UserData = {
   consecutiveVisits: number;
   /** show tags on problems table */
@@ -62,8 +98,8 @@ export type UserData = {
 // What's exposed in the context
 type UserDataContextAPI = {
   userData: UserData | null;
-  firebaseUser: User | null;
-  forceFirebaseUserRerender: () => void;
+  currentUser: AppUser | null;
+  forceCurrentUserRerender: () => void;
   isLoaded: boolean;
   /**
    * See properties/hooks.ts for documentation on how this function works.
@@ -71,7 +107,7 @@ type UserDataContextAPI = {
   updateUserData: (
     updateFunc: (prevUserData: UserData) => {
       localStorageUpdate: Partial<UserData>;
-      firebaseUpdate: object;
+      remoteUpdate: Partial<UserData>;
     }
   ) => void;
   importUserData: (data: Partial<UserData>) => boolean;
@@ -114,19 +150,42 @@ const UserDataContext = createContext<UserDataContextAPI>({
   userData: assignDefaultsToUserData({}),
   updateUserData: _ => {},
   signOut: () => Promise.resolve(),
-  firebaseUser: null,
-  forceFirebaseUserRerender: () => {},
+  currentUser: null,
+  forceCurrentUserRerender: () => {},
   importUserData: _ => false,
   isLoaded: true,
 });
+
+const loadLocalUserData = ({ useURLLang } = { useURLLang: true }) => {
+  let localStorageData: Partial<UserData>;
+  try {
+    localStorageData = JSON.parse(
+      localStorage.getItem(LOCAL_STORAGE_KEY) ?? '{}'
+    );
+  } catch (e) {
+    localStorageData = {};
+  }
+
+  if (useURLLang) {
+    const urlLang = getLangFromUrl();
+    if (urlLang) {
+      localStorageData.lang = urlLang;
+    }
+  }
+
+  const actualUserData = assignDefaultsToUserData(localStorageData);
+  localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(actualUserData));
+  return actualUserData;
+};
 
 export const UserDataProvider = ({
   children,
 }: {
   children: ReactNode;
 }): JSX.Element => {
-  const firebaseApp = useFirebaseApp();
-  const [firebaseUser, setFirebaseUser] = useState<User | null>(null);
+  const [session, setSession] = useState<Session | null>(null);
+  const [profile, setProfile] = useState<UserProfileRow | null>(null);
+  const [currentUser, setCurrentUser] = useState<AppUser | null>(null);
   const [userData, setUserData] = React.useReducer(
     (prevState: UserData, updates: Partial<UserData>): UserData => {
       if (updates.lang && prevState.lang !== updates.lang) {
@@ -146,13 +205,14 @@ export const UserDataProvider = ({
     }
   );
   const [isLoaded, setIsLoaded] = useState<boolean>(false);
-  const numPendingFirebaseWritesRef = useRef(0);
+  const numPendingRemoteWritesRef = useRef(0);
+  const shouldUseLangQueryParamRef = useRef(true);
 
   // Show a message warning the user their data isn't saved
-  // if they try to exit the page before firebase finishes writing
+  // if they try to exit the page before sync finishes writing
   React.useEffect(() => {
     function beforeUnloadListener(this: Window, ev: BeforeUnloadEvent) {
-      if (numPendingFirebaseWritesRef.current !== 0) {
+      if (numPendingRemoteWritesRef.current !== 0) {
         ev.preventDefault();
         return (ev.returnValue = '');
       }
@@ -165,137 +225,185 @@ export const UserDataProvider = ({
     };
   }, []);
 
-  // Listen for firebase user sign in / sign out
-  useFirebaseApp(firebase => {
-    // For the very first firestore data read, we should set the language property
-    // to whatever the URL query param is
-    let shouldUseLangQueryParam = true;
-
-    const auth = getAuth(firebase);
-    let snapshotUnsubscribe: null | (() => void) = null;
-    const authUnsubscribe = onAuthStateChanged(auth, user => {
-      if (snapshotUnsubscribe) {
-        snapshotUnsubscribe();
-        snapshotUnsubscribe = null;
-      }
-
-      if (user == null) setIsLoaded(true);
-      else setIsLoaded(false);
-      setFirebaseUser(user);
-
-      // If the user is signed in, sync remote data with local data
-      if (user) {
-        const userDoc = doc(getFirestore(firebaseApp), 'users', user.uid);
-
-        snapshotUnsubscribe = onSnapshot(userDoc, {
-          next: snapshot => {
-            const data = snapshot.data();
-            if (!data) {
-              // sync all local data with firebase if the firebase account doesn't exist yet
-              // other APIs use updateDoc() so we need to initialize it with *something*
-              setDoc(
-                userDoc,
-                {
-                  ...userData,
-
-                  // this is to prevent us from accidentally overriding the user data
-                  // firebase security rules will have a check to make sure that this is actually the first time
-                  // the user has logged in. occasionally, with poor internet, firebase will glitch and
-                  // we will accidentally override user data.
-                  // see https://github.com/cpinitiative/usamo-guide/issues/534
-                  CREATING_ACCOUNT_FOR_FIRST_TIME: serverTimestamp(),
-                },
-                { merge: true }
-              );
-            } else {
-              const newUserData = assignDefaultsToUserData(data);
-              if (shouldUseLangQueryParam) {
-                const urlLang = getLangFromUrl();
-                if (urlLang) {
-                  newUserData.lang = urlLang;
-                }
-              }
-              localStorage.setItem(
-                LOCAL_STORAGE_KEY,
-                JSON.stringify(newUserData)
-              );
-              console.log('got new fb data', newUserData);
-              debouncedSetUserData(newUserData); // Use debounced version here
-            }
-
-            shouldUseLangQueryParam = false;
-            setIsLoaded(true);
-          },
-          error: error => {
-            toast.error(error.message);
-          },
-        });
-      }
-    });
-    return () => {
-      authUnsubscribe();
-      if (snapshotUnsubscribe) snapshotUnsubscribe();
-    };
-  });
-
-  const initializeFromLocalStorage = (
-    { useURLLang } = { useURLLang: true }
-  ) => {
-    let localStorageData: Partial<UserData>;
-    try {
-      localStorageData = JSON.parse(
-        localStorage.getItem(LOCAL_STORAGE_KEY) ?? '{}'
-      );
-    } catch (e) {
-      localStorageData = {};
-    }
-
-    if (useURLLang) {
-      const urlLang = getLangFromUrl();
-      if (urlLang) {
-        localStorageData.lang = urlLang;
-      }
-    }
-
-    const actualUserData = assignDefaultsToUserData(localStorageData);
-
-    // We should write back to local storage if either URL lang changed,
-    // or if some defaults were assigned. But being lazy, let's just
-    // write back all the time.
-    localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(actualUserData));
-
-    debouncedSetUserData(actualUserData); // Use debounced version here too
-  };
-
-  // initialize from localstorage
-  React.useEffect(() => {
-    runMigration();
-    initializeFromLocalStorage();
-    // todo: does this actually run before isLoaded is set to true?
-  }, []);
-
-  // Add debouncing to prevent excessive Firebase updates
+  // Add debouncing to prevent excessive updates
   const debouncedSetUserData = useMemo(
     () => debounce(data => setUserData(data), 100),
     []
   );
 
+  // Initialize from localstorage
+  React.useEffect(() => {
+    runMigration();
+    const initialData = loadLocalUserData();
+    debouncedSetUserData(initialData);
+    // todo: does this actually run before isLoaded is set to true?
+  }, []);
+
+  // Listen for auth state changes
+  React.useEffect(() => {
+    let alive = true;
+    supabase.auth
+      .getSession()
+      .then(({ data }) => {
+        if (!alive) return;
+        setSession(data.session ?? null);
+      })
+      .catch(err => {
+        // eslint-disable-next-line no-console
+        console.error(err);
+      });
+
+    const { data } = supabase.auth.onAuthStateChange((_event, newSession) => {
+      setSession(newSession);
+    });
+
+    return () => {
+      alive = false;
+      data.subscription.unsubscribe();
+    };
+  }, []);
+
+  // Sync user profile + user data when session changes
+  React.useEffect(() => {
+    let alive = true;
+
+    const loadUserData = async () => {
+      if (!session?.user) {
+        setProfile(null);
+        setCurrentUser(null);
+        setIsLoaded(true);
+        return;
+      }
+
+      setIsLoaded(false);
+      const userId = session.user.id;
+
+      const { data: profileData, error: profileError } = await supabase
+        .from('profiles')
+        .select(
+          'display_name, avatar_url, is_admin, can_moderate, can_create_groups'
+        )
+        .eq('id', userId)
+        .maybeSingle();
+
+      if (!alive) return;
+
+      if (profileError) {
+        // eslint-disable-next-line no-console
+        console.error(profileError);
+      }
+
+      if (!profileData) {
+        const createdProfile = {
+          id: userId,
+          display_name:
+            session.user.user_metadata?.full_name ?? session.user.email ?? '',
+          avatar_url: session.user.user_metadata?.avatar_url ?? null,
+        };
+        await supabase.from('profiles').upsert(createdProfile);
+        setProfile({
+          display_name: createdProfile.display_name,
+          avatar_url: createdProfile.avatar_url,
+          is_admin: false,
+          can_moderate: false,
+          can_create_groups: false,
+        });
+      }
+      if (profileData) {
+        setProfile(profileData ?? null);
+      }
+
+      const { data: userDataRow, error: userDataError } = await supabase
+        .from('user_data')
+        .select('data')
+        .eq('user_id', userId)
+        .maybeSingle();
+
+      if (!alive) return;
+
+      if (userDataError && userDataError.code !== 'PGRST116') {
+        toast.error(userDataError.message);
+      }
+
+      if (!userDataRow?.data) {
+        const localData = loadLocalUserData({
+          useURLLang: shouldUseLangQueryParamRef.current,
+        });
+        await supabase.from('user_data').upsert({
+          user_id: userId,
+          data: localData,
+        });
+        localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(localData));
+        debouncedSetUserData(localData);
+      } else {
+        const newUserData = assignDefaultsToUserData(userDataRow.data);
+        if (shouldUseLangQueryParamRef.current) {
+          const urlLang = getLangFromUrl();
+          if (urlLang) {
+            newUserData.lang = urlLang;
+          }
+        }
+        localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(newUserData));
+        debouncedSetUserData(newUserData);
+      }
+
+      shouldUseLangQueryParamRef.current = false;
+      setIsLoaded(true);
+    };
+
+    loadUserData();
+
+    return () => {
+      alive = false;
+    };
+  }, [session?.user?.id]);
+
+  React.useEffect(() => {
+    setCurrentUser(buildAppUser(session, profile));
+  }, [session, profile]);
+
+  // Realtime updates for user data
+  React.useEffect(() => {
+    if (!session?.user) return;
+    const userId = session.user.id;
+    const channel = supabase
+      .channel(`user_data_${userId}`)
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'user_data',
+          filter: `user_id=eq.${userId}`,
+        },
+        payload => {
+          const newData = (payload.new as { data?: UserData } | null)?.data;
+          if (!newData) return;
+          const merged = assignDefaultsToUserData(newData);
+          localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(merged));
+          debouncedSetUserData(merged);
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [session?.user?.id]);
+
   const userDataAPI: UserDataContextAPI = {
     userData,
 
-    firebaseUser,
+    currentUser,
+
     /**
-     * Forces anything that depends on firebaseUser to rerender.
-     * Sometimes, such as when we just linked a Github account to a Google account,
-     * firebaseUser changes, but React doesn't know about the change so it doesn't rerender.
-     * This function forces React to update firebaseUser and trigger any rerenders
-     * that might be necessary. This function is used in SignInModal.tsx,
-     * when someone links a Google or Github account, causing firebaseUser to change,
-     * but onAuthStateChanged doesn't rereun.
+     * Forces anything that depends on currentUser to rerender.
+     * This is kept for compatibility with existing UI flows.
      */
-    forceFirebaseUserRerender: () => {
-      // todo: test to see whether this actually works lol
-      setFirebaseUser(getAuth(firebaseApp).currentUser);
+    forceCurrentUserRerender: () => {
+      supabase.auth
+        .getSession()
+        .then(({ data }) => setSession(data.session ?? null));
     },
 
     isLoaded,
@@ -308,68 +416,68 @@ export const UserDataProvider = ({
           );
         }
 
-        // In the localStorage path, this is guaranteed the latest copy of the data
-        // In the firestore path, this is probably still the latest copy of the data,
-        // since any time firestore updates, it writes to localStorage.
         const latestUserData = JSON.parse(
-          // Since we write valid user data to local storage every time the page loads,
-          // just assume reading will be valid. If it isn't, the user can always reload
-          // the page to get a working version of user data.
           // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
           localStorage.getItem(LOCAL_STORAGE_KEY)!
-        );
+        ) as UserData;
 
-        if (firebaseUser) {
-          // user is signed in to firebase, do the firebase update path
-          const userDoc = doc(
-            getFirestore(firebaseApp),
-            'users',
-            firebaseUser.uid
+        const changes = updateFunc(latestUserData);
+        const mergedUserData = {
+          ...latestUserData,
+          ...changes.localStorageUpdate,
+          ...changes.remoteUpdate,
+        };
+
+        if (currentUser) {
+          numPendingRemoteWritesRef.current++;
+          localStorage.setItem(
+            LOCAL_STORAGE_KEY,
+            JSON.stringify(mergedUserData)
           );
+          debouncedSetUserData(mergedUserData);
+          void (async () => {
+            try {
+              const { error } = await supabase
+                .from('user_data')
+                .update({ data: mergedUserData })
+                .eq('user_id', currentUser.uid);
 
-          const changes = updateFunc(latestUserData).firebaseUpdate;
-          const firebaseUpdatePromise = updateDoc(userDoc, changes);
-
-          numPendingFirebaseWritesRef.current++;
-          firebaseUpdatePromise
-            .catch(err => {
+              if (error) {
+                throw error;
+              }
+            } catch (err) {
               console.error('Failed to sync to server', changes);
               console.error(err);
+              const message =
+                err instanceof Error ? err.message : 'Unknown error';
               toast.error(
                 'Failed to sync to server: ' +
-                  err +
+                  message +
                   '. Please submit an error report on GitHub with developer console messages.',
                 {
                   duration: Infinity,
                 }
               );
-            })
-            .finally(() => {
-              numPendingFirebaseWritesRef.current--;
-            });
-
-          // After this update finishes, we don't have to do anything -- our
-          // onSnapshot listener will automatically be called with the updated data
-          // Also, firestore has optimistic updates, so the user will see changes immediately
+            } finally {
+              numPendingRemoteWritesRef.current--;
+            }
+          })();
         } else {
-          // user isn't signed in, do the localStorage update path
-          const newUserData = {
-            ...latestUserData,
-            ...updateFunc(latestUserData).localStorageUpdate,
-          };
-
-          localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(newUserData));
-
-          debouncedSetUserData(newUserData); // Use debounced version here
+          localStorage.setItem(
+            LOCAL_STORAGE_KEY,
+            JSON.stringify(mergedUserData)
+          );
+          debouncedSetUserData(mergedUserData);
         }
       },
-      [firebaseApp, setUserData, isLoaded, !!firebaseUser]
+      [isLoaded, currentUser, setUserData]
     ),
 
     signOut: (): Promise<void> => {
-      return signOut(getAuth(firebaseApp)).then(() => {
+      return supabase.auth.signOut().then(() => {
         localStorage.removeItem(LOCAL_STORAGE_KEY);
-        initializeFromLocalStorage({ useURLLang: false });
+        const localData = loadLocalUserData({ useURLLang: false });
+        debouncedSetUserData(localData);
       });
     },
 
@@ -381,22 +489,17 @@ export const UserDataProvider = ({
       ) {
         const updatedData = assignDefaultsToUserData(data);
         localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(updatedData));
-        debouncedSetUserData(updatedData); // Use debounced version here
-        if (firebaseUser) {
-          // Stupid hack: if firebase user is set, userData will actually have
-          // the CREATING_ACCOUNT_FOR_FIRST_TIME property, since userData will
-          // be set from the Firebase doc.
-          const CREATING_ACCOUNT_FOR_FIRST_TIME = (userData as any)
-            .CREATING_ACCOUNT_FOR_FIRST_TIME;
-          setDoc(doc(getFirestore(firebaseApp), 'users', firebaseUser.uid), {
-            ...data,
-            CREATING_ACCOUNT_FOR_FIRST_TIME,
-          }).catch(err => {
-            console.error(err);
-            alert(
-              `importUserData: Error setting firebase doc. Check console for details.`
-            );
-          });
+        debouncedSetUserData(updatedData);
+        if (currentUser) {
+          supabase
+            .from('user_data')
+            .upsert({ user_id: currentUser.uid, data: updatedData })
+            .catch(err => {
+              console.error(err);
+              alert(
+                'importUserData: Error setting user data. Check console for details.'
+              );
+            });
         }
         return true;
       }
@@ -425,16 +528,16 @@ export const useUpdateUserData = () => {
   return React.useContext(UserDataContext).updateUserData;
 };
 
-export const useFirebaseUser = () => {
-  return React.useContext(UserDataContext).firebaseUser;
+export const useCurrentUser = () => {
+  return React.useContext(UserDataContext).currentUser;
 };
 
 export const useIsUserDataLoaded = () => {
   return React.useContext(UserDataContext).isLoaded;
 };
 
-export const useForceFirebaseUserRerender = () => {
-  return React.useContext(UserDataContext).forceFirebaseUserRerender;
+export const useForceCurrentUserRerender = () => {
+  return React.useContext(UserDataContext).forceCurrentUserRerender;
 };
 
 export const useSignOutAction = () => {

@@ -2,7 +2,7 @@ import { Transition } from '@headlessui/react';
 import { Link, navigate } from 'gatsby';
 import * as React from 'react';
 import { useRef, useState } from 'react';
-import { useFirebaseUser } from '../../../context/UserDataContext/UserDataContext';
+import { useCurrentUser } from '../../../context/UserDataContext/UserDataContext';
 import { useActiveGroup } from '../../../hooks/groups/useActiveGroup';
 import { useGroupActions } from '../../../hooks/groups/useGroupActions';
 import { usePostActions } from '../../../hooks/groups/usePostActions';
@@ -13,7 +13,7 @@ export default function GroupPageHeader(props: { group: GroupData }) {
   const { createNewPost } = usePostActions(props.group?.id);
   const [isActionsOpen, setIsActionsOpen] = useState(false);
   const { showAdminView, setInStudentView } = useActiveGroup();
-  const firebaseUser = useFirebaseUser();
+  const currentUser = useCurrentUser();
   const ref = useRef<HTMLDivElement>(null);
 
   React.useEffect(() => {
@@ -128,8 +128,8 @@ export default function GroupPageHeader(props: { group: GroupData }) {
                     </Link>
                   </>
                 )}
-                {firebaseUser &&
-                  isUserAdminOfGroup(props.group, firebaseUser.uid) && (
+                {currentUser &&
+                  isUserAdminOfGroup(props.group, currentUser.uid) && (
                     <button
                       type="button"
                       className="block w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900 focus:bg-gray-100 focus:text-gray-900 focus:outline-hidden"
@@ -158,7 +158,7 @@ export default function GroupPageHeader(props: { group: GroupData }) {
                         .toLowerCase()
                         .indexOf('yes i am sure i want to leave') > -1
                     ) {
-                      leaveGroup(groupId, firebaseUser!.uid)
+                      leaveGroup(groupId, currentUser!.uid)
                         .then(() => navigate(`/groups/`))
                         .catch(e => {
                           console.log(e);

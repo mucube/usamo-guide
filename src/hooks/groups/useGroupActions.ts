@@ -1,21 +1,10 @@
-import {
-  collection,
-  doc,
-  getDocs,
-  getFirestore,
-  setDoc,
-  updateDoc,
-  writeBatch,
-} from 'firebase/firestore';
-import { getFunctions, httpsCallable } from 'firebase/functions';
-import { useFirebaseUser } from '../../context/UserDataContext/UserDataContext';
+import { useCurrentUser } from '../../context/UserDataContext/UserDataContext';
+import { supabase } from '../../lib/supabaseClient';
 import { GroupData, JoinGroupLink } from '../../models/groups/groups';
-import { useFirebaseApp } from '../useFirebase';
 import { useUserGroups } from './useUserGroups';
 
 export function useGroupActions() {
-  const firebaseApp = useFirebaseApp();
-  const firebaseUser = useFirebaseUser();
+  const currentUser = useCurrentUser();
   const { invalidateData } = useUserGroups();
 
   const updateGroup = async (
@@ -23,95 +12,64 @@ export function useGroupActions() {
     updatedData: Partial<GroupData>
   ) => {
     const { id, ...data } = updatedData;
-    await updateDoc(doc(getFirestore(firebaseApp), 'groups', groupId), {
-      ...data,
+    const updatePayload: Record<string, any> = {
+      name: data.name,
+      description: data.description,
+      owner_ids: data.ownerIds,
+      admin_ids: data.adminIds,
+      member_ids: data.memberIds,
+      post_ordering: data.postOrdering,
+    };
+    Object.keys(updatePayload).forEach(key => {
+      if (updatePayload[key] === undefined) delete updatePayload[key];
     });
+    await supabase.from('groups').update(updatePayload).eq('id', groupId);
     invalidateData();
   };
 
   return {
     createNewGroup: async () => {
-      if (!firebaseUser?.uid) {
+      if (!currentUser?.uid) {
         throw 'The user must be logged in to create a new group.';
       }
 
       const defaultGroup: Omit<GroupData, 'id'> = {
         name: 'New Group',
         description: '',
-        ownerIds: [firebaseUser.uid],
+        ownerIds: [currentUser.uid],
         adminIds: [],
         memberIds: [],
         postOrdering: [],
       };
-      const groupDoc = doc(collection(getFirestore(firebaseApp), 'groups'));
-      const group: GroupData = {
-        ...defaultGroup,
-        id: groupDoc.id,
-      };
-
-      await setDoc(groupDoc, group).then(() => invalidateData());
-
-      return groupDoc.id;
+      const { data, error } = await supabase
+        .from('groups')
+        .insert({
+          name: defaultGroup.name,
+          description: defaultGroup.description,
+          owner_ids: defaultGroup.ownerIds,
+          admin_ids: defaultGroup.adminIds,
+          member_ids: defaultGroup.memberIds,
+          post_ordering: defaultGroup.postOrdering,
+        })
+        .select('id')
+        .single();
+      if (error) throw error;
+      invalidateData();
+      return data.id;
     },
     deleteGroup: async (groupId: string) => {
-      const firestore = getFirestore(firebaseApp);
-      // oops this batch should really be a transaction todo
-      const batch = writeBatch(firestore);
-
-      const posts = await getDocs(
-        collection(firestore, 'groups', groupId, 'posts')
-      );
-      posts.docs.forEach(doc => batch.delete(doc.ref));
-      await Promise.all(
-        posts.docs.map(async doc => {
-          const problems = await getDocs(
-            collection(
-              firestore,
-              'groups',
-              groupId,
-              'posts',
-              doc.id,
-              'problems'
-            )
-          );
-          problems.docs.forEach(doc => batch.delete(doc.ref));
-          await Promise.all(
-            problems.docs.map(async problemDoc => {
-              const submissions = await getDocs(
-                collection(
-                  firestore,
-                  'groups',
-                  groupId,
-                  'posts',
-                  doc.id,
-                  'problems',
-                  problemDoc.id,
-                  'submissions'
-                )
-              );
-              submissions.docs.forEach(doc => batch.delete(doc.ref));
-            })
-          );
-        })
-      );
-      batch.delete(doc(firestore, 'groups', groupId));
-
-      await batch.commit();
+      const { error } = await supabase.from('groups').delete().eq('id', groupId);
+      if (error) throw error;
       invalidateData();
     },
     updateGroup,
     leaveGroup: async (groupId: string, userId: string) => {
-      const leaveResult = (
-        await httpsCallable(
-          getFunctions(firebaseApp),
-          'groups-leave'
-        )({
-          groupId,
-        })
-      ).data as never as
+      const { data } = await supabase.rpc('groups_leave', {
+        p_group_id: groupId,
+      });
+      const leaveResult = data as
         | { success: true }
         | { success: false; errorCode: string };
-      console.log(leaveResult);
       // === typeguard check
       if (leaveResult.success === true) {
         invalidateData();
@@ -136,18 +94,31 @@ export function useGroupActions() {
         maxUses: null,
         expirationTime: null,
         usedBy: [],
-        author: firebaseUser!.uid,
+        author: currentUser!.uid,
       };
-      const linkDoc = doc(
-        collection(getFirestore(firebaseApp), 'group-join-links')
-      );
-      const docId = linkDoc.id;
-
-      await setDoc(linkDoc, defaultJoinLink);
-
+      const { data, error } = await supabase
+        .from('group_join_links')
+        .insert({
+          group_id: defaultJoinLink.groupId,
+          revoked: defaultJoinLink.revoked,
+          num_uses: defaultJoinLink.numUses,
+          max_uses: defaultJoinLink.maxUses,
+          expiration_time: defaultJoinLink.expirationTime,
+          used_by: defaultJoinLink.usedBy,
+          author: defaultJoinLink.author,
+        })
+        .select('*')
+        .single();
+      if (error) throw error;
       return {
-        ...defaultJoinLink,
-        id: docId,
+        id: data.id,
+        groupId: data.group_id,
+        revoked: data.revoked,
+        numUses: data.num_uses,
+        maxUses: data.max_uses,
+        expirationTime: data.expiration_time,
+        usedBy: data.used_by ?? [],
+        author: data.author,
       };
     },
     updateJoinLink: async (
@@ -155,30 +126,34 @@ export function useGroupActions() {
       linkData: Partial<JoinGroupLink>
     ): Promise<void> => {
       const { id: _, ...data } = linkData;
-      await updateDoc(
-        doc(getFirestore(firebaseApp), 'group-join-links', id),
-        // no clue why this throws a typescript error without it...
-        data as any
-      );
+      await supabase
+        .from('group_join_links')
+        .update({
+          group_id: data.groupId,
+          revoked: data.revoked,
+          num_uses: data.numUses,
+          max_uses: data.maxUses,
+          expiration_time: data.expirationTime,
+          used_by: data.usedBy,
+          author: data.author,
+        })
+        .eq('id', id);
     },
     updatePostOrdering: async (groupId: string, ordering: string[]) => {
-      await updateDoc(doc(getFirestore(firebaseApp), 'groups', groupId), {
-        postOrdering: ordering,
-      });
+      await supabase
+        .from('groups')
+        .update({ post_ordering: ordering })
+        .eq('id', groupId);
     },
     removeMemberFromGroup: async (
       groupId: string,
       targetUid: string
     ): Promise<void> => {
-      const removeResult = (
-        await httpsCallable(
-          getFunctions(firebaseApp),
-          'groups-removeMember'
-        )({
-          groupId,
-          targetUid,
-        })
-      ).data as never as
+      const { data } = await supabase.rpc('groups_remove_member', {
+        p_group_id: groupId,
+        p_target_uid: targetUid,
+      });
+      const removeResult = data as
         | { success: true }
         | { success: false; errorCode: string };
       if (removeResult.success === true) {
@@ -205,16 +180,12 @@ export function useGroupActions() {
       targetUid: string,
       newPermissionLevel: 'OWNER' | 'ADMIN' | 'MEMBER'
     ): Promise<void> => {
-      const updateResult = (
-        await httpsCallable(
-          getFunctions(firebaseApp),
-          'groups-updateMemberPermissions'
-        )({
-          groupId,
-          targetUid,
-          newPermissionLevel,
-        })
-      ).data as never as
+      const { data } = await supabase.rpc('groups_update_member_permissions', {
+        p_group_id: groupId,
+        p_target_uid: targetUid,
+        new_permission_level: newPermissionLevel,
+      });
+      const updateResult = data as
         | { success: true }
         | { success: false; errorCode: string };
       if (updateResult.success === true) {

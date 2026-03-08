@@ -24,7 +24,7 @@ import {
   useUserProgressOnModules,
   useUserProgressOnProblems,
 } from '../context/UserDataContext/properties/userProgress';
-import { useFirebaseUser } from '../context/UserDataContext/UserDataContext';
+import { useCurrentUser } from '../context/UserDataContext/UserDataContext';
 import {
   useModulesProgressInfo,
   useProblemsProgressInfo,
@@ -63,7 +63,7 @@ export default function DashboardPage(props: PageProps) {
   const lastViewedModuleID = useLastViewedModule();
   const userProgressOnModules = useUserProgressOnModules();
   const userProgressOnProblems = useUserProgressOnProblems();
-  const firebaseUser = useFirebaseUser();
+  const currentUser = useCurrentUser();
   const { consecutiveVisits } = useLastVisitInfo();
   const showIgnored = useShowIgnoredSetting();
   const { signIn } = useSignIn();
@@ -147,9 +147,9 @@ export default function DashboardPage(props: PageProps) {
               <div className="pt-4 pb-6 lg:px-8">
                 <div className="mb-4 flex flex-wrap">
                   <div className="w-full text-center">
-                    {firebaseUser ? (
+                    {currentUser ? (
                       <>
-                        Signed in as <i>{firebaseUser.email}</i>.
+                        Signed in as <i>{currentUser.email}</i>.
                       </>
                     ) : (
                       <span>

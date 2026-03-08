@@ -1,16 +1,13 @@
-import { getFunctions, httpsCallable } from 'firebase/functions';
 import React from 'react';
 import toast from 'react-hot-toast';
 import {
   UserPermissionInformation,
   UserPermissions,
 } from '../../context/UserDataContext/UserPermissionsContext';
-import { useFirebaseApp } from '../../hooks/useFirebase';
+import { supabase } from '../../lib/supabaseClient';
 import Switch from '../elements/Switch';
 
 export default function AdminSettings() {
-  const firebaseApp = useFirebaseApp();
-
   const [email, setEmail] = React.useState('');
   const [searching, setSearching] = React.useState(false);
 
@@ -33,18 +30,16 @@ export default function AdminSettings() {
 
     setSearching(true);
     try {
-      const response = await (httpsCallable(
-        getFunctions(firebaseApp),
-        'getUsers'
-      )({
-        users: [{ email }],
-      }) as any);
-      if (response.data.users.length === 0) {
+      const { data, error } = await supabase.functions.invoke('admin-get-user', {
+        body: { email },
+      });
+      if (error) throw error;
+      if (!data || data.users.length === 0) {
         toast.error('The user with email ' + email + ' could not be found.');
       } else {
-        console.log('Got user: ', response.data.users[0]);
-        setUserData(response.data.users[0]);
-        setUserPermissions(response.data.users[0].customClaims);
+        console.log('Got user: ', data.users[0]);
+        setUserData(data.users[0]);
+        setUserPermissions(data.users[0].customClaims);
       }
     } catch (e) {
       toast.error(e.message);
@@ -69,13 +64,16 @@ export default function AdminSettings() {
     setIsUpdating(true);
 
     try {
-      await httpsCallable(
-        getFunctions(firebaseApp),
-        'setUserClaims'
-      )({
-        target: userData.uid,
-        claims: userPermissions,
-      });
+      const { error } = await supabase.functions.invoke(
+        'admin-set-user-permissions',
+        {
+          body: {
+            target: userData.uid,
+            claims: userPermissions,
+          },
+        }
+      );
+      if (error) throw error;
       toast(
         'Updated user permissions! The target user may have to sign out and sign back in to complete the changes.',
         {

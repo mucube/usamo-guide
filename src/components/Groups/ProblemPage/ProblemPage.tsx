@@ -1,5 +1,4 @@
 import dayjs from 'dayjs';
-import { Timestamp } from 'firebase/firestore';
 import { Link, navigate } from 'gatsby';
 import React from 'react';
 import toast from 'react-hot-toast';
@@ -31,6 +30,15 @@ export default function ProblemPage(props) {
   if (!problem || post?.type !== 'assignment' || activeGroup.isLoading) {
     return null;
   }
+
+  const customReleaseTimestamp =
+    problem.solutionReleaseMode === 'custom'
+      ? problem.solutionReleaseTimestamp
+      : null;
+  const releaseDisplayTimestamp =
+    problem.solutionReleaseMode === 'due-date'
+      ? post.dueTimestamp
+      : customReleaseTimestamp;
 
   return (
     <Layout>
@@ -166,9 +174,10 @@ export default function ProblemPage(props) {
                       {problem.solutionReleaseMode == 'now' ||
                       (problem.solutionReleaseMode == 'due-date' &&
                         post.dueTimestamp &&
-                        post.dueTimestamp.toMillis() < Date.now()) ||
+                        new Date(post.dueTimestamp).getTime() < Date.now()) ||
                       (problem.solutionReleaseMode == 'custom' &&
-                        problem.solutionReleaseTimestamp.toMillis() <
+                        customReleaseTimestamp &&
+                        new Date(customReleaseTimestamp).getTime() <
                           Date.now()) ? (
                         <Spoiler title={'Show Solution'}>
                           <div className="pb-4">
@@ -185,12 +194,7 @@ export default function ProblemPage(props) {
                             The problem solution will be released on{' '}
                             {problem &&
                               dayjs(
-                                (
-                                  (problem.solutionReleaseMode == 'due-date'
-                                    ? post.dueTimestamp
-                                    : problem.solutionReleaseMode == 'custom' &&
-                                      problem.solutionReleaseTimestamp) as Timestamp
-                                )?.toDate()
+                                new Date(releaseDisplayTimestamp!)
                               ).format('MMMM DD h:mma')}
                             .
                           </p>

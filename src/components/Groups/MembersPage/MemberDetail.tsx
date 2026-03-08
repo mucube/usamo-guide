@@ -1,8 +1,8 @@
 import { navigate } from 'gatsby-link';
 import * as React from 'react';
 import toast from 'react-hot-toast';
-import { useFirebaseUser } from '../../../context/UserDataContext/UserDataContext';
-import getPermissionLevel from '../../../functions/src/groups/utils/getPermissionLevel';
+import { useCurrentUser } from '../../../context/UserDataContext/UserDataContext';
+import getPermissionLevel from '../../../utils/groups/getPermissionLevel';
 import { useActiveGroup } from '../../../hooks/groups/useActiveGroup';
 import { useGroupActions } from '../../../hooks/groups/useGroupActions';
 import { useUserLeaderboardData } from '../../../hooks/groups/useLeaderboardData';
@@ -10,7 +10,7 @@ import { MemberInfo } from '../../../hooks/groups/useMemberInfoForGroup';
 export default function MemberDetail({ member }: { member: MemberInfo }) {
   const activeGroup = useActiveGroup();
   const { removeMemberFromGroup, updateMemberPermissions } = useGroupActions();
-  const { uid: userId } = useFirebaseUser()!;
+  const { uid: userId } = useCurrentUser()!;
   const userLeaderboardData = useUserLeaderboardData(
     activeGroup.activeGroupId!,
     member.uid

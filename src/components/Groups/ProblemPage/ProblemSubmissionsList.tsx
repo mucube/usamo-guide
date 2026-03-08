@@ -1,6 +1,6 @@
 import * as React from 'react';
 import {
-  FirebaseSubmission,
+  GroupSubmission,
   getSubmissionEarnedPoints,
   getSubmissionStatus,
   getSubmissionTimestampString,
@@ -16,7 +16,7 @@ const SubmissionListItem = ({
   submission,
 }: {
   problem: ProblemData;
-  submission: FirebaseSubmission;
+  submission: GroupSubmission;
 }) => {
   const showSubmissionAction = useProblemSubmissionPopupAction();
 
@@ -77,7 +77,7 @@ export default function ProblemSubmissionsList({
   submissions,
 }: {
   problem: ProblemData;
-  submissions: FirebaseSubmission[];
+  submissions: GroupSubmission[];
 }) {
   if (!submissions?.length) {
     return (

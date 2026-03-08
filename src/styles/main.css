@@ -1,4 +1,5 @@
 @import 'tailwindcss';
+@import './theme.css' layer(base);
 
 @theme {
   --color-dark-surface: #121212;

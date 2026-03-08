@@ -1,21 +1,22 @@
 import * as React from 'react';
 import { useEffect, useState } from 'react';
+import { supabase } from '../../lib/supabaseClient';
 
 export default function TrustedBy() {
   const [numUsers, setNumUsers] = useState(-1);
   const [numPageviews, setNumPageviews] = useState(-1);
   const [numStars, setNumStars] = useState(-1);
   useEffect(() => {
-    fetch('https://usamo-guide.firebaseio.com/pageviews.json')
-      .then(resp => resp.json())
-      .then(pageviews => {
-        setNumPageviews(parseInt(pageviews));
-      });
-    fetch('https://usamo-guide.firebaseio.com/num_users.json')
-      .then(resp => resp.json())
-      .then(numUsers => {
-        setNumUsers(parseInt(numUsers));
-      });
+    const loadStats = async () => {
+      const { data } = await supabase.rpc('get_public_site_stats');
+      if (data) {
+        const stats = data as { num_users?: number; pageviews?: number };
+        setNumPageviews(Number(stats.pageviews ?? 0));
+        setNumUsers(Number(stats.num_users ?? 0));
+      }
+    };
+
+    void loadStats();
     fetch('https://api.github.com/repos/cpinitiative/usamo-guide')
       .then(resp => resp.json())
       .then(data => {

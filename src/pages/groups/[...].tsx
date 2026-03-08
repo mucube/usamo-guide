@@ -30,7 +30,7 @@ import SEO from '../../components/seo';
 import TopNavigationBar from '../../components/TopNavigationBar/TopNavigationBar';
 import { useSignIn } from '../../context/SignInContext';
 import {
-  useFirebaseUser,
+  useCurrentUser,
   useIsUserDataLoaded,
 } from '../../context/UserDataContext/UserDataContext';
 import {
@@ -56,7 +56,7 @@ const GroupPageWrapper = (props: GroupPageWrapperProps): ReactElement => {
 
   const { activeGroupId, setActiveGroupId, isLoading, groupData } =
     useActiveGroup();
-  const firebaseUser = useFirebaseUser();
+  const currentUser = useCurrentUser();
   const isUserLoaded = useIsUserDataLoaded();
   const { signIn } = useSignIn();
   useEffect(() => {
@@ -65,7 +65,7 @@ const GroupPageWrapper = (props: GroupPageWrapperProps): ReactElement => {
     return () => setActiveGroupId(undefined);
   }, []);
 
-  if (isUserLoaded && !firebaseUser?.uid) {
+  if (isUserLoaded && !currentUser?.uid) {
     return (
       <Layout>
         <TopNavigationBar />

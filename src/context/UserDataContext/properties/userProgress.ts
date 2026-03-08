@@ -1,4 +1,3 @@
-import { arrayUnion } from 'firebase/firestore';
 import { ModuleProgress } from '../../../models/module';
 import { ProblemProgress } from '../../../models/problem';
 import { ResourceProgress } from '../../../models/resource';
@@ -40,9 +39,15 @@ export const useSetProgressOnModule = createUserDataMutation(
           newActivityData,
         ],
       },
-      firebaseUpdate: {
-        [`userProgressOnModules.${moduleID}`]: progress,
-        userProgressOnModulesActivity: arrayUnion(newActivityData),
+      remoteUpdate: {
+        userProgressOnModules: {
+          ...userData.userProgressOnModules,
+          [moduleID]: progress,
+        },
+        userProgressOnModulesActivity: [
+          ...userData.userProgressOnModulesActivity,
+          newActivityData,
+        ],
       },
     };
   }
@@ -66,20 +71,26 @@ export const useSetProgressOnProblem = createUserDataMutation(
           newActivityData,
         ],
       },
-      firebaseUpdate: {
-        [`userProgressOnProblems.${problemID}`]: progress,
-        userProgressOnProblemsActivity: arrayUnion(newActivityData),
+      remoteUpdate: {
+        userProgressOnProblems: {
+          ...userData.userProgressOnProblems,
+          [problemID]: progress,
+        },
+        userProgressOnProblemsActivity: [
+          ...userData.userProgressOnProblemsActivity,
+          newActivityData,
+        ],
       },
     };
   }
 );
 
-export const replaceIllegalFirebaseCharacters = (str: string) => {
+export const replaceIllegalResourceKeyCharacters = (str: string) => {
   return str.replace(/[^a-zA-Z0-9]/g, ''); // technically only ~*/[] aren't allowed but whatever
 };
 export const useSetProgressOnResource = createUserDataMutation(
   (userData, resourceID: string, progress: ResourceProgress) => {
-    resourceID = replaceIllegalFirebaseCharacters(resourceID);
+    resourceID = replaceIllegalResourceKeyCharacters(resourceID);
     return {
       localStorageUpdate: {
         userProgressOnResources: {
@@ -87,8 +98,11 @@ export const useSetProgressOnResource = createUserDataMutation(
           [resourceID]: progress,
         },
       },
-      firebaseUpdate: {
-        [`userProgressOnResources.${resourceID}`]: progress,
+      remoteUpdate: {
+        userProgressOnResources: {
+          ...userData.userProgressOnResources,
+          [resourceID]: progress,
+        },
       },
     };
   }

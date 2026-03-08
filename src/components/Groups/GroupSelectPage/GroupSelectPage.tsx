@@ -1,7 +1,7 @@
 import { navigate } from 'gatsby';
 import * as React from 'react';
 import {
-  useFirebaseUser,
+  useCurrentUser,
   useIsUserDataLoaded,
 } from '../../../context/UserDataContext/UserDataContext';
 import { useUserPermissions } from '../../../context/UserDataContext/UserPermissionsContext';
@@ -14,13 +14,13 @@ import AdminViewAllGroups from './AdminViewAllGroups';
 import { GroupCard } from './GroupCard';
 
 const GroupSelectPage = () => {
-  const firebaseUser = useFirebaseUser();
+  const currentUser = useCurrentUser();
   const isLoaded = useIsUserDataLoaded();
   const groups = useUserGroups();
   const { createNewGroup } = useGroupActions();
   const permissions = useUserPermissions();
 
-  const showNotSignedInMessage = isLoaded && !firebaseUser?.uid;
+  const showNotSignedInMessage = isLoaded && !currentUser?.uid;
   const showLoading = !showNotSignedInMessage && !groups.isSuccess;
 
   const handleCreateNewGroup = () => {

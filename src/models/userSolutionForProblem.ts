@@ -1,5 +1,3 @@
-import { Timestamp } from 'firebase/firestore';
-
 export type UserSolutionForProblem = {
   id: string;
   userID: string;
@@ -9,5 +7,5 @@ export type UserSolutionForProblem = {
   solutionCode: string;
   upvotes: string[];
   language: 'cpp' | 'java' | 'py' | 'unknown';
-  timestamp: Timestamp;
+  timestamp: string;
 };

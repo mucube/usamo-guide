@@ -1,21 +1,9 @@
-import {
-  addDoc,
-  arrayRemove,
-  arrayUnion,
-  collection,
-  deleteDoc,
-  doc,
-  getFirestore,
-  Timestamp,
-  updateDoc,
-} from 'firebase/firestore';
-import { useFirebaseUser } from '../context/UserDataContext/UserDataContext';
+import { useCurrentUser } from '../context/UserDataContext/UserDataContext';
+import { supabase } from '../lib/supabaseClient';
 import { UserSolutionForProblem } from '../models/userSolutionForProblem';
-import { useFirebaseApp } from './useFirebase';
 
 export default function useUserProblemSolutionActions() {
-  const firebaseApp = useFirebaseApp();
-  const firebaseUser = useFirebaseUser();
+  const currentUser = useCurrentUser();
 
   return {
     submitSolution: async (
@@ -24,46 +12,45 @@ export default function useUserProblemSolutionActions() {
         'userID' | 'userName' | 'id' | 'upvotes' | 'timestamp'
       >
     ) => {
-      await addDoc(
-        collection(getFirestore(firebaseApp), 'userProblemSolutions'),
-        {
-          ...solution,
-          userID: firebaseUser?.uid,
-          userName: firebaseUser?.displayName,
-          upvotes: [],
-          timestamp: Timestamp.now(),
-        }
-      );
+      await supabase.from('user_problem_solutions').insert({
+        problem_id: solution.problemID,
+        is_public: solution.isPublic,
+        solution_code: solution.solutionCode,
+        language: solution.language,
+        user_id: currentUser?.uid,
+        user_name: currentUser?.displayName ?? '',
+        upvotes: [],
+        created_at: new Date().toISOString(),
+      });
     },
     deleteSolution: async (solutionID: string) => {
-      await deleteDoc(
-        doc(getFirestore(firebaseApp), 'userProblemSolutions', solutionID)
-      );
+      await supabase
+        .from('user_problem_solutions')
+        .delete()
+        .eq('id', solutionID);
     },
     mutateSolution: async (
       solutionID: string,
       updates: Partial<UserSolutionForProblem>
     ) => {
-      await updateDoc(
-        doc(getFirestore(firebaseApp), 'userProblemSolutions', solutionID),
-        updates
-      );
+      await supabase
+        .from('user_problem_solutions')
+        .update({
+          is_public: updates.isPublic,
+          solution_code: updates.solutionCode,
+          language: updates.language,
+        })
+        .eq('id', solutionID);
     },
     upvoteSolution: async (solutionID: string) => {
-      await updateDoc(
-        doc(getFirestore(firebaseApp), 'userProblemSolutions', solutionID),
-        {
-          upvotes: arrayUnion(firebaseUser?.uid),
-        }
-      );
+      await supabase.rpc('upvote_user_problem_solution', {
+        solution_id: solutionID,
+      });
     },
     undoUpvoteSolution: async (solutionID: string) => {
-      await updateDoc(
-        doc(getFirestore(firebaseApp), 'userProblemSolutions', solutionID),
-        {
-          upvotes: arrayRemove(firebaseUser?.uid),
-        }
-      );
+      await supabase.rpc('remove_upvote_user_problem_solution', {
+        solution_id: solutionID,
+      });
     },
   };
 }

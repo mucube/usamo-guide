@@ -10,11 +10,9 @@ Note: This may be out of date.
   suffice)
   - Can also host on Netlify
   - Can also host by yourself
-- Firebase backend (pay-as-you-go plan, pretty generous free tier)
-  - No easy replacement
-  - Technically can function without Firebase -- user login wouldn't work,
-    classes wouldn't work, but everything else will still work (including local
-    progress tracking)
+- Supabase backend (Auth + Postgres + Storage)
+  - Auth, DB, and Edge Functions replace Firebase services
+  - Without Supabase, user login, group features, and syncing will not work
 - Algolia for Search
   - Open source plan. With some optimizations you _might_ be able to get by with
     the free tier plan. Otherwise pay as you go.

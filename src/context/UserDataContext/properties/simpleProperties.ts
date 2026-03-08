@@ -90,8 +90,7 @@ export const useSetDivisionTableQuery = createSimpleUserDataMutation(
 );
 
 // last viewed module is set in useUpdateStreakEffect
-// we have a limitation of one update per second (firebase rate limit),
-// so we combine the two updates
+// we keep updates batched to avoid excessive remote writes
 export const useLastViewedModule = createUserDataGetter(
   userData => userData.lastViewedModule
 );

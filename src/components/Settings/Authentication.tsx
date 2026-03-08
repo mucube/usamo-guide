@@ -1,18 +1,18 @@
 import { CheckIcon, XIcon } from '@heroicons/react/solid';
 import * as React from 'react';
-import { useFirebaseUser } from '../../context/UserDataContext/UserDataContext';
+import { useCurrentUser } from '../../context/UserDataContext/UserDataContext';
 
 export default function Authentication() {
-  const firebaseUser = useFirebaseUser();
+  const currentUser = useCurrentUser();
 
   let linkedWithGoogle = false;
   let linkedWithGithub = false;
 
-  if (firebaseUser) {
-    linkedWithGoogle = !!firebaseUser.providerData.find(
+  if (currentUser) {
+    linkedWithGoogle = !!currentUser.providerData.find(
       provider => provider.providerId === 'google.com'
     );
-    linkedWithGithub = !!firebaseUser.providerData.find(
+    linkedWithGithub = !!currentUser.providerData.find(
       provider => provider.providerId === 'github.com'
     );
   }
@@ -25,7 +25,7 @@ export default function Authentication() {
         </h3>
       </div>
       <div className="h-4" />
-      {firebaseUser ? (
+      {currentUser ? (
         <div>
           <fieldset className="border-b border-gray-200 dark:border-gray-700">
             <legend className="sr-only">Notifications</legend>

@@ -1,7 +1,16 @@
 require('dotenv').config();
 
+if (!process.env.GATSBY_SUPABASE_URL && process.env.SUPABASE_URL) {
+  process.env.GATSBY_SUPABASE_URL = process.env.SUPABASE_URL;
+}
+
+if (!process.env.GATSBY_SUPABASE_ANON_KEY && process.env.SUPABASE_ANON_KEY) {
+  process.env.GATSBY_SUPABASE_ANON_KEY = process.env.SUPABASE_ANON_KEY;
+}
+
 const flags = {
   FAST_DEV: true,
+  DEV_SSR: false,
 };
 
 const siteMetadata = {
@@ -119,6 +128,10 @@ module.exports = {
   siteMetadata,
   plugins,
   graphqlTypegen: {
-    generateOnBuild: true,
+    generateOnBuild: process.env.NODE_ENV === 'production',
+    typesOutputPath:
+      process.env.NODE_ENV === 'production'
+        ? 'src/gatsby-types.d.ts'
+        : '.cache/typegen/gatsby-types.d.ts',
   },
 };

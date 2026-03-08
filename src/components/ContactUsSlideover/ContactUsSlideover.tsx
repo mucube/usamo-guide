@@ -3,7 +3,7 @@ import { useContext, useEffect, useState } from 'react';
 import { SECTION_LABELS } from '../../../content/ordering';
 import MarkdownLayoutContext from '../../context/MarkdownLayoutContext';
 import { useUserLangSetting } from '../../context/UserDataContext/properties/simpleProperties';
-import { useFirebaseUser } from '../../context/UserDataContext/UserDataContext';
+import { useCurrentUser } from '../../context/UserDataContext/UserDataContext';
 import useContactFormAction from '../../hooks/useContactFormAction';
 import useStickyState from '../../hooks/useStickyState';
 import { ModuleInfo } from '../../models/module';
@@ -115,16 +115,16 @@ export default function ContactUsSlideover({
     }
   }, [markdownContext?.markdownLayoutInfo]);
 
-  const firebaseUser = useFirebaseUser();
+  const currentUser = useCurrentUser();
   useEffect(() => {
-    if (!firebaseUser) return;
+    if (!currentUser) return;
     if (email === '') {
-      setEmail(firebaseUser.email!);
+      setEmail(currentUser.email!);
     }
     if (name === '') {
-      setName(firebaseUser.displayName!);
+      setName(currentUser.displayName!);
     }
-  }, [firebaseUser]);
+  }, [currentUser]);
 
   React.useEffect(() => {
     if (isOpen) {
@@ -144,7 +144,7 @@ export default function ContactUsSlideover({
       !validateEmail(email) ||
       topic === '' ||
       message.length < 10 ||
-      !firebaseUser
+      !currentUser
     ) {
       return;
     }
@@ -262,7 +262,7 @@ export default function ContactUsSlideover({
         )}
         {!showSuccess && (
           <div className="space-y-6 pb-5">
-            {!firebaseUser && (
+            {!currentUser && (
               <p className="mt-2 text-sm text-red-600 dark:text-red-400">
                 You must be logged in to submit the contact form!
               </p>
@@ -388,7 +388,7 @@ export default function ContactUsSlideover({
               >
                 Message (markdown is supported)
               </label>
-              {showErrors && !firebaseUser && (
+              {showErrors && !currentUser && (
                 <p className="mt-2 text-sm text-red-600 dark:text-red-400">
                   You must be logged in to submit the contact form!
                 </p>

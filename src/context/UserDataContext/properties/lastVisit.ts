@@ -1,4 +1,3 @@
-import { increment } from 'firebase/firestore';
 import { UserData } from '../UserDataContext';
 import { createUserDataGetter, createUserDataMutation } from './hooks';
 
@@ -24,23 +23,24 @@ export const useSetLastVisitDate = createUserDataMutation(
 
     const changes: {
       localStorageUpdate: Partial<UserData>;
-      firebaseUpdate: Record<string, any>;
+      remoteUpdate: Partial<UserData>;
     } = {
       localStorageUpdate: {},
-      firebaseUpdate: {},
+      remoteUpdate: {},
     };
 
     if (timeSinceLastVisit >= oneDay && timeSinceLastVisit <= twoDays) {
       changes.localStorageUpdate['lastVisitDate'] = lastVisitDate;
-      changes.firebaseUpdate['lastVisitDate'] = lastVisitDate;
+      changes.remoteUpdate['lastVisitDate'] = lastVisitDate;
       changes.localStorageUpdate['consecutiveVisits'] =
         userData.consecutiveVisits + 1;
-      changes.firebaseUpdate[`consecutiveVisits`] = increment(1);
+      changes.remoteUpdate['consecutiveVisits'] =
+        userData.consecutiveVisits + 1;
     } else if (timeSinceLastVisit > twoDays) {
       changes.localStorageUpdate['lastVisitDate'] = lastVisitDate;
-      changes.firebaseUpdate['lastVisitDate'] = lastVisitDate;
+      changes.remoteUpdate['lastVisitDate'] = lastVisitDate;
       changes.localStorageUpdate['consecutiveVisits'] = 1;
-      changes.firebaseUpdate[`consecutiveVisits`] = 1;
+      changes.remoteUpdate[`consecutiveVisits`] = 1;
     }
     changes.localStorageUpdate['numPageviews'] = userData.numPageviews + 1;
     changes.localStorageUpdate['pageviewsPerDay'] = {
@@ -56,13 +56,14 @@ export const useSetLastVisitDate = createUserDataMutation(
       changes.localStorageUpdate.pageviewsPerDay[todayDateTimestamp] = 1;
     }
 
-    changes.firebaseUpdate[`numPageviews`] = increment(1);
-    changes.firebaseUpdate[`pageviewsPerDay.${todayDateTimestamp}`] =
-      increment(1);
+    changes.remoteUpdate['numPageviews'] =
+      changes.localStorageUpdate.numPageviews;
+    changes.remoteUpdate['pageviewsPerDay'] =
+      changes.localStorageUpdate.pageviewsPerDay;
 
     if (lastViewedModule) {
       changes.localStorageUpdate.lastViewedModule = lastViewedModule;
-      changes.firebaseUpdate.lastViewedModule = lastViewedModule;
+      changes.remoteUpdate.lastViewedModule = lastViewedModule;
     }
 
     return changes;

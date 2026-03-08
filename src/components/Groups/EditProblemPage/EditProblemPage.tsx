@@ -1,13 +1,5 @@
 import { CheckIcon, XIcon } from '@heroicons/react/solid';
 import { RouteComponentProps } from '@reach/router';
-import {
-  collection,
-  getDocs,
-  getFirestore,
-  limit,
-  query,
-  Timestamp,
-} from 'firebase/firestore';
 import { Link, navigate } from 'gatsby';
 import * as React from 'react';
 import { useReducer } from 'react';
@@ -17,7 +9,7 @@ import { useActiveGroup } from '../../../hooks/groups/useActiveGroup';
 import { usePost } from '../../../hooks/groups/usePost';
 import { usePostActions } from '../../../hooks/groups/usePostActions';
 import { useProblem } from '../../../hooks/groups/useProblem';
-import { useFirebaseApp } from '../../../hooks/useFirebase';
+import { supabase } from '../../../lib/supabaseClient';
 import { GroupProblemData } from '../../../models/groups/problem';
 import {
   AlgoliaProblemInfo,
@@ -44,7 +36,6 @@ export default function EditProblemPage(props: Props) {
   if (!groupId || !postId || !problemId) {
     throw 'Misplaced EditProblemPage component! This should be under the param URL with :groupId, :postId, and :problemId';
   }
-  const firebaseApp = useFirebaseApp();
   const activeGroup = useActiveGroup();
   const post = usePost(postId);
   if (!post) throw new Error('Post not found');
@@ -72,21 +63,21 @@ export default function EditProblemPage(props: Props) {
   const [canEditPoints, setCanEditPoints] = React.useState(false);
   React.useEffect(() => {
     setCanEditPoints(false);
-    if (!firebaseApp || !postId || !problemId) return;
-    getDocs(
-      query(
-        collection(
-          getFirestore(firebaseApp),
-          `groups/${groupId}/posts/${postId}/problems/${problemId}/submissions`
-        ),
-        limit(1)
-      )
-    ).then(resp => {
-      if (resp.docs.length === 0) {
-        setCanEditPoints(true);
-      }
-    });
-  }, [firebaseApp, postId, problemId]);
+    if (!postId || !problemId) return;
+    supabase
+      .from('group_problem_submissions')
+      .select('id')
+      .eq('group_id', groupId)
+      .eq('post_id', postId)
+      .eq('problem_id', problemId)
+      .limit(1)
+      .then(({ data, error }) => {
+        if (error) return;
+        if ((data ?? []).length === 0) {
+          setCanEditPoints(true);
+        }
+      });
+  }, [postId, problemId]);
 
   const handleDeleteProblem = () => {
     if (confirm('Are you sure you want to delete this problem?')) {
@@ -304,13 +295,15 @@ export default function EditProblemPage(props: Props) {
                             ].join('\\\\'),
                           enableTime: true,
                         }}
-                        value={problem.solutionReleaseTimestamp?.toDate()}
+                        value={
+                          problem.solutionReleaseTimestamp
+                            ? new Date(problem.solutionReleaseTimestamp)
+                            : undefined
+                        }
                         onChange={date => {
                           console.log(date);
                           editProblem({
-                            solutionReleaseTimestamp: Timestamp.fromDate(
-                              date[0]
-                            ),
+                            solutionReleaseTimestamp: date[0].toISOString(),
                           });
                         }}
                         className="input mt-2"

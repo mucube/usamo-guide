@@ -1,27 +1,40 @@
-import { updateProfile } from 'firebase/auth';
 import React from 'react';
 import toast from 'react-hot-toast';
-import { useFirebaseUser } from '../../context/UserDataContext/UserDataContext';
+import { useCurrentUser } from '../../context/UserDataContext/UserDataContext';
+import { supabase } from '../../lib/supabaseClient';
 
 export default function Profile(): JSX.Element {
-  const firebaseUser = useFirebaseUser();
+  const currentUser = useCurrentUser();
 
-  const [name, setName] = React.useState(firebaseUser?.displayName);
+  const [name, setName] = React.useState(currentUser?.displayName);
 
   React.useEffect(() => {
-    if (firebaseUser?.displayName) {
-      setName(firebaseUser.displayName);
+    if (currentUser?.displayName) {
+      setName(currentUser.displayName);
     } else {
       setName(null);
     }
-  }, [firebaseUser?.displayName]);
+  }, [currentUser?.displayName]);
 
   const handleSubmit = e => {
-    if (!firebaseUser) throw new Error('User not logged in');
+    if (!currentUser) throw new Error('User not logged in');
     e.preventDefault();
-    updateProfile(firebaseUser, { displayName: name });
-
-    toast.success('Username updated');
+    supabase
+      .from('profiles')
+      .update({ display_name: name })
+      .eq('id', currentUser.uid)
+      .then(({ error }) => {
+        if (error) {
+          throw error;
+        }
+        return supabase.auth.updateUser({
+          data: { full_name: name },
+        });
+      })
+      .then(() => toast.success('Username updated'))
+      .catch(err => {
+        toast.error(err.message ?? 'Failed to update profile');
+      });
   };
 
   return (
@@ -32,7 +45,7 @@ export default function Profile(): JSX.Element {
         </h3>
       </div>
       <div className="h-4" />
-      {firebaseUser ? (
+      {currentUser ? (
         <form className="space-y-6" onSubmit={handleSubmit}>
           <div>
             <label
