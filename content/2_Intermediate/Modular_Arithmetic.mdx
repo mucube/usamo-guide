@@ -1,0 +1,97 @@
+---
+id: modular-arithmetic
+title: Modular Arithmetic
+author: Siddhant Arora
+description: A powerful tool useful in solving problems involving remainders and divisibility.
+prerequisites: []
+---
+
+# Modular Arithmetic
+
+## Introduction
+
+Throughout practicing many problems, you may have encountered problems of the following type:
+
+> Find the remainder when $3^{2026}$ is divided by $7$.
+
+There exists an entire branch of mathematics centered around tackling such problems involving remainders, divisibility, etc. termed Modular Arithmetic.
+
+
+## Terminology
+
+- $a \equiv b \pmod{m}$ (pronounced, "$a$ is congruent to $b$ modulo $m$"): $a$ has the remainder, $b$, when divided by $m$.
+- **Residue Classes**:  Modular arithmetic groups all integers into a finite set of "residues" based on their remainders. In modulo 5, every integer is essentially reduced to one of five values: $\{0, 1, 2, 3, 4\}$
+
+## The Last Digit
+
+Suppose you are solving a problem involving very large numbers, and you are asked to compute the last digit of the result. For instance:
+
+> Find the last digit of when $45^{45}$
+
+Instead of dealing with the entire number $45$, we should only deal with its remainder modulo $10$, i.e, $5$. Hence, the problem reduces to:
+
+> Find the last digit of when $5^{45}$
+
+which is a lot easier as the last digit of any positive integral power of $5$ is always $5$.
+
+## Principles:
+
+- If $a \equiv b \pmod{m}$ and $p \equiv q \pmod{m}$, then for all positive integers $c$:
+
+1. $a + c \equiv b + c \pmod{m}$
+2. $a - c \equiv b - c \pmod{m}$
+3. $ac \equiv bc \pmod{m}$
+4. $a^{c} \equiv b^{c} \pmod{m}$
+5. $a + p \equiv b + q \pmod{m}$
+6. $ap \equiv bq \pmod{m}$
+
+## Tips:
+
+- When considering divisibility, move all terms to one side in a congruence equation. For instance, if: $a \equiv b \pmod{m}$, then:
+    $a - b \equiv 0 \pmod{m}$. This tells us that $a - b$ is divisible (if $x \equiv 0 \pmod{y}$, $x$ is divisible by $y$) by $m$ which is a useful fact.
+- Given an $n$-digit positive integer $a_1, a_2, \ldots, a_n$, we can 'expand' it to get: $a_1 \cdot 10^{n-1} + \cdots + a_n$. Now we can treat each term separately and consider its modulo some remainder, and sum all of them at the end. This is how divisiblity tricks are obtained!
+
+## Divisibility Tricks
+
+For an $n$-digit positive integer $\overline{a_1 a_2 \ldots a_n} = a_1 \cdot 10^{n-1} + \cdots + a_n$:
+
+- **Divisible by 2** if $a_n \equiv 0 \pmod{2}$, i.e. the last digit is even.
+- **Divisible by 5** if $a_n \equiv 0 \pmod{5}$, i.e. the last digit is $0$ or $5$.
+- **Divisible by 4** if the last two digits form a number divisible by $4$, since $100 \equiv 0 \pmod{4}$.
+- **Divisible by 3** if $a_1 + a_2 + \cdots + a_n \equiv 0 \pmod{3}$, i.e. the sum of digits is divisible by $3$.
+- **Divisible by 9** if $a_1 + a_2 + \cdots + a_n \equiv 0 \pmod{9}$, i.e. the sum of digits is divisible by $9$.
+- **Divisible by 11** if $a_1 - a_2 + a_3 - \cdots \equiv 0 \pmod{11}$, i.e. the alternating digit sum is divisible by $11$.
+
+
+## Focus Problem:
+
+**Solution:**
+
+Let $N = \overline{abc} = 100a + 10b + c$ where $a \in \{1, \ldots, 9\}$ and $b, c \in \{0, \ldots, 9\}$.
+
+The reversal of $N$ is $\overline{cba} = 100c + 10b + a$.
+
+**Condition 1:** $N \equiv 0 \pmod{7}$
+
+**Condition 2:** $\overline{cba} \equiv 0 \pmod{5}$
+
+Since $\overline{cba}$ is divisible by $5$, its last digit $a$ must satisfy $a \equiv 0 \pmod{5}$, so $a \in \{5\}$ (since $a \neq 0$, as $N$ is a three-digit number, and $a = 10$ is impossible).
+
+So $a = 5$, meaning $N = 500 + 10b + c$.
+
+**Applying Condition 1:**
+
+$$500 + 10b + c \equiv 0 \pmod{7}$$
+
+Since $500 = 71 \cdot 7 + 3$, we have $500 \equiv 3 \pmod{7}$, so:
+
+$$10b + c \equiv -3 \equiv 4 \pmod{7}$$
+
+We need to count pairs $(b, c)$ with $b \in \{0, \ldots, 9\}$, $c \in \{0, \ldots, 9\}$ such that $10b + c \equiv 4 \pmod 7$.
+
+Note that $10b + c$ ranges over all integers from $0$ to $99$. Among any $7$ consecutive integers, exactly one is congruent to $4 \pmod{7}$. Since $100 = 14 \cdot 7 + 2$, the values $0, 1, \ldots, 99$ contain:
+- $14$ complete cycles of $7$, giving $14$ solutions.
+- A partial cycle $\{0, 1\}$ (i.e., $10b + c \in \{98, 99\}$), neither of which is $\equiv 4 \pmod{7}$.
+
+Therefore there are $\boxed{14}$ three-digit integers satisfying both conditions.
+
