@@ -30,6 +30,30 @@
       "solutionMetadata": {
         "kind": "none"
       }
+    },
+    {
+      "uniqueId": "amc8-2025-9",
+      "name": "Problem 9 (2025 AMC 8)",
+      "url": "https://artofproblemsolving.com/wiki/index.php/2025_AMC_8_Problems/Problem_9?srsltid=AfmBOopSxVAkbJ8NIlLV_fbFrW8gdHqpByFpVEEca2Q5rH6sGggVPI9Z",
+      "source": "AMC 8",
+      "difficulty": "Easy",
+      "isStarred": false,
+      "tags": ["Brute Force"],
+      "solutionMetadata": {
+        "kind": "none"
+      }
+    },
+    {
+      "uniqueId": "amc8-2023-8",
+      "name": "Problem 5 (2023 AMC 8)",
+      "url": "https://artofproblemsolving.com/wiki/index.php/2023_AMC_8_Problems/Problem_5?srsltid=AfmBOopoqq00IDsH9Mr80t2W16Iy_DJ2Vn6t4rKAAF0pRFRHdbQyRVey",
+      "source": "AMC 8",
+      "difficulty": "Easy",
+      "isStarred": false,
+      "tags": ["Brute Force"],
+      "solutionMetadata": {
+        "kind": "none"
+      }
     }
   ]
 }
