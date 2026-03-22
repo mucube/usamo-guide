@@ -1,4 +1,53 @@
 {
   "MODULE_ID": "exponent-rules",
-  "practice": []
+  "practice": [
+    {
+      "uniqueId": "test-exponent-simplify",
+      "name": "TEST: Simplify Exponents",
+      "url": "https://usamo.guide/test/exponent-simplify",
+      "source": "Custom",
+      "difficulty": "Very Easy",
+      "isStarred": true,
+      "tags": ["Testing", "Inline Solution", "Exponents"],
+      "statement": "Simplify $\\frac{x^5 \\cdot x^3}{x^2}$ where $x \\neq 0$.\n\nEnter your answer as a single power of $x$ (just the exponent).\n\n**Example:** If the answer is $x^7$, enter `7`",
+      "interaction": {
+        "type": "integer",
+        "correct": "6"
+      },
+      "solutionReveal": {
+        "mode": "inline",
+        "markdown": "## Solution\n\nWe use the exponent rules:\n- $x^a \\cdot x^b = x^{a+b}$ (product rule)\n- $\\frac{x^a}{x^b} = x^{a-b}$ (quotient rule)\n\nApplying these rules:\n$$\\frac{x^5 \\cdot x^3}{x^2} = \\frac{x^{5+3}}{x^2} = \\frac{x^8}{x^2} = x^{8-2} = x^6$$\n\nTherefore, the exponent is **6**."
+      },
+      "solutionMetadata": {
+        "kind": "none"
+      }
+    },
+    {
+      "uniqueId": "test-exponent-negative",
+      "name": "TEST: Negative Exponents",
+      "url": "https://usamo.guide/test/exponent-negative",
+      "source": "Custom",
+      "difficulty": "Easy",
+      "isStarred": false,
+      "tags": ["Testing", "Inline Solution", "Exponents"],
+      "statement": "Which expression is equivalent to $2^{-3}$?",
+      "interaction": {
+        "type": "mcq",
+        "choices": [
+          "$-8$",
+          "$\\frac{1}{8}$",
+          "$-\\frac{1}{8}$",
+          "$8$"
+        ],
+        "correctIndex": 1
+      },
+      "solutionReveal": {
+        "mode": "inline",
+        "markdown": "## Solution\n\nThe negative exponent rule states:\n$$x^{-n} = \\frac{1}{x^n}$$\n\nApplying this to $2^{-3}$:\n$$2^{-3} = \\frac{1}{2^3} = \\frac{1}{8}$$\n\nTherefore, the answer is $\\boxed{\\frac{1}{8}}$."
+      },
+      "solutionMetadata": {
+        "kind": "none"
+      }
+    }
+  ]
 }

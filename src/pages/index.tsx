@@ -93,7 +93,10 @@ export default function IndexPage({ path }): JSX.Element {
 
       {/* Begin Hero */}
       <div className="relative overflow-hidden -mt-16 pt-32 bg-gray-50 dark:bg-gradient-to-b dark:from-black dark:via-black dark:to-[#1a0d00] transition-colors duration-500">
-        <div className="pointer-events-none absolute inset-0 bg-[url('/images/math-doodles.png')] bg-repeat bg-center dark:opacity-17" />
+        <div
+          className="pointer-events-none absolute inset-0 bg-repeat bg-center blur-[1px] dark:opacity-17"
+          style={{ backgroundImage: "url('/images/math-doodles.png')" }}
+        />
         <div className="pointer-events-none absolute inset-0 z-0">
           
           <div className="absolute inset-0 z-0 [mask-image:radial-gradient(ellipse_at_center,white_20%,transparent_75%)]">
@@ -122,7 +125,8 @@ export default function IndexPage({ path }): JSX.Element {
           </div>
         </div>
 
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-full bg-[radial-gradient(circle_at_center,rgba(251,146,60,0.08)_0%,transparent_70%)] pointer-events-none" />
+        <div className="pointer-events-none absolute inset-0 z-0 bg-[radial-gradient(ellipse_95%_80%_at_50%_38%,rgba(0,0,0,0.28)_0%,rgba(0,0,0,0.12)_40%,rgba(0,0,0,0.05)_58%,transparent_80%)] dark:bg-[radial-gradient(ellipse_95%_80%_at_50%_38%,rgba(0,0,0,0.48)_0%,rgba(0,0,0,0.24)_40%,rgba(0,0,0,0.1)_58%,transparent_80%)]" />
+        <div className="pointer-events-none absolute top-1/2 left-1/2 h-full w-full -translate-x-1/2 -translate-y-1/2 bg-[radial-gradient(circle_at_center,rgba(251,146,60,0.05)_0%,transparent_68%)]" />
         <div className="absolute bottom-[20%] right-[-5%] w-[30%] h-[30%] bg-purple-500/10 blur-[100px] rounded-full" />
       
         <div className="absolute inset-x-0 bottom-0 h-64 bg-linear-to-t from-[#160f08] to-transparent" />
@@ -135,19 +139,13 @@ export default function IndexPage({ path }): JSX.Element {
 
             <div className="mb-4 flex justify-center">
               <a
-                href="https://github.com/usamoguide/usamo-guide"
+                href="https://www.usamoguide.com/contact-us"
                 target="_blank"
                 rel="noreferrer"
                 className="inline-flex items-center rounded-full border border-orange-300/80 bg-linear-to-r from-orange-100 to-amber-100 px-6 py-3 text-base font-extrabold tracking-wide text-orange-900 shadow-[0_8px_24px_rgba(251,146,60,0.25)] transition-transform duration-200 hover:-translate-y-0.5 hover:scale-105 dark:border-orange-700/60 dark:from-orange-900/40 dark:to-amber-900/30 dark:text-orange-100"
               >
-                Star us on GitHub
+                Written by USAMO/JMO qualifiers.
               </a>
-            </div>
-
-            <div className="dark:hidden md:justify-center">
-              <h1 className={classNames(usamoTitleClasses, 'mt-4 text-black')}>
-                The Only Online Guide for Math Competition
-              </h1>
             </div>
 
             <div>
@@ -157,14 +155,16 @@ export default function IndexPage({ path }): JSX.Element {
                   'mx-auto h-0 w-full max-w-4xl flex-row items-center justify-center leading-20 font-semibold dark:visible dark:h-auto'
                 )}
               >
-                The Only Guide You Need for Competitive Math
+                A Clear Roadmap from
+                <br />
+                <span className="whitespace-nowrap">AMC to Olympiad</span>
               </h1>
             </div>
 
             <div className="h-6 sm:h-8"></div>
 
             <p className="font-brand text-8 text-center leading-snug text-gray-800 sm:text-xl md:!leading-normal 2xl:text-3xl dark:text-gray-300">
-              A simple, easy to follow pathway for your success
+            Structured topics, curated problems, and a clear path to Olympiad-level problem solving
             </p>
 
             <div className="h-10 sm:h-14"></div>
@@ -174,14 +174,14 @@ export default function IndexPage({ path }): JSX.Element {
                 to="/dashboard"
                 className="inline-block rounded-full border-orange-600 bg-linear-to-br from-orange-300 to-orange-400 px-8 py-3 text-[16px] font-bold text-white transition-all duration-300 hover:scale-105 hover:shadow-[0_0_20px_rgba(251,146,60,0.4)]"
               >
-                Resources {'>'}
+                Start Learning {'>'}
               </Link>
               <GlowingRing>
                 <Link
-                  to="/dashboard"
+                  to="/foundations"
                   className={classNames(whiteButtonClassesBig, '!text-[15px] inline-block !font-bold')}
                 >
-                  Get Started
+                  Browse Topics
                 </Link>
               </GlowingRing>
             </div>
@@ -376,7 +376,10 @@ export default function IndexPage({ path }): JSX.Element {
 
       {/* Begin FAQ */}
       <div className="relative dark:bg-dark-surface bg-white">
-        <div className="pointer-events-none absolute inset-0 bg-[url('/images/math-doodles.png')] bg-repeat bg-center dark:opacity-12" />
+        <div
+          className="pointer-events-none absolute inset-0 bg-repeat bg-center dark:opacity-12"
+          style={{ backgroundImage: "url('/images/math-doodles.png')" }}
+        />
         <div className="relative z-10 mx-auto max-w-(--breakpoint-xl) px-4 pt-12 pb-16 sm:px-6 sm:pt-16 sm:pb-20 lg:px-8 lg:pt-20 lg:pb-28">
           <h2 className={classNames(headerClasses, 'dark:text-gray-100 text-center')}>
             Frequently asked questions
