@@ -16,9 +16,31 @@ This seems extremely daunting to do with techniques such as factoring and even c
 
 The quadratic formula is a relatively short formula that gives us all roots of a second-degree polynomial (or *quadratic*). Namely, for a quadratic: $ax^2 + bx + c$, its roots are:
 
-$x = \frac{-b \pm \sqrt{b^2 - 4ac}}{2a}$
+> $${x = \frac{-b \pm \sqrt{b^2 - 4ac}}{2a}}$$
 
-## The Discriminant
+**Derivation of the Quadratic Formula**
+>
+> Begin with the general quadratic $ax^2 + bx + c = 0$. Divide through by $a$:
+>
+> $$x^2 + \frac{b}{a}x + \frac{c}{a} = 0$$
+>
+> Move the constant to the right:
+>
+> $$x^2 + \frac{b}{a}x = -\frac{c}{a}$$
+>
+> Complete the square by adding $\left(\dfrac{b}{2a}\right)^2$ to both sides:
+>
+> $$x^2 + \frac{b}{a}x + \left(\frac{b}{2a}\right)^2 = \left(\frac{b}{2a}\right)^2 - \frac{c}{a}$$
+>
+> The left side is now a perfect square trinomial:
+>
+> $$\left(x + \frac{b}{2a}\right)^2 = \frac{b^2 - 4ac}{4a^2}$$
+>
+> Taking the square root of both sides and isolating $x$:
+>
+> $$x + \frac{b}{2a} = \pm\frac{\sqrt{b^2 - 4ac}}{2a}$$
+>
+> $$\boxed{x = \frac{-b \pm \sqrt{b^2 - 4ac}}{2a}}$$
 
 The *discriminant* of the quadratic formula is the expression underneath the square root, i.e, $b^2 - 4ac$ (not $\sqrt{b^2 - 4ac}$).
 
