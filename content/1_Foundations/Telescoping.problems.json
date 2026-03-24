@@ -1,4 +1,58 @@
 {
   "MODULE_ID": "telescoping",
-  "practice": []
+  "practice": [
+  {
+    "uniqueId": "amc10b-2025-15",
+    "name": "Problem 15 (2025 AMC 10B)",
+    "url": "https://artofproblemsolving.com/wiki/index.php?title=2025_AMC_10B_Problems/Problem_15",
+    "source": "AMC 10B",
+    "difficulty": "Medium",
+    "isStarred": false,
+    "tags": [
+      "Algebra",
+      "Series",
+      "Telescoping",
+      "Partial Fractions"
+    ],
+    "statement": "A sum problem that can be expressed as a fraction a/b, where a and b are relatively prime positive integers. Find a + b.",
+    "solutionMetadata": {
+      "kind": "none"
+    }
+  },
+  {
+    "uniqueId": "ahsme-1959-37",
+    "name": "Problem 37 (1959 AHSME)",
+    "url": "https://artofproblemsolving.com/wiki/index.php?title=1959_AHSME_Problems/Problem_37",
+    "source": "AHSME",
+    "difficulty": "Medium",
+    "isStarred": false,
+    "tags": [
+      "Algebra",
+      "Products",
+      "Telescoping"
+    ],
+    "statement": "When simplified, the product (1 - 1/2²)(1 - 1/3²)(1 - 1/4²)···(1 - 1/n²) becomes:",
+    "solutionMetadata": {
+      "kind": "none"
+    }
+  },
+  {
+    "uniqueId": "amc10b-2022-9",
+    "name": "Problem 9 (2022 AMC 10B)",
+    "url": "https://artofproblemsolving.com/wiki/index.php?title=2022_AMC_10B_Problems/Problem_9",
+    "source": "AMC 10B",
+    "difficulty": "Medium",
+    "isStarred": false,
+    "tags": [
+      "Algebra",
+      "Series",
+      "Telescoping",
+      "Sum"
+    ],
+    "statement": "A sum problem that can be expressed as m/n, where m and n are positive integers. Find m + n.",
+    "solutionMetadata": {
+      "kind": "none"
+    }
+  }
+]
 }
