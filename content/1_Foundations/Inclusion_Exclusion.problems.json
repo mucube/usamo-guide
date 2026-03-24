@@ -1,31 +1,105 @@
 {
-    "MODULE_ID": "inclusion-exclusion",
-    "practice": [
-        {
-            "uniqueId": "amc8-2010-20",
-            "name": "Problem 20 (2010 AMC 8)",
-            "url": "https://artofproblemsolving.com/wiki/index.php/2010_AMC_8_Problems/Problem_20",
-            "source": "AMC 8",
-            "difficulty": "Easy",
-            "isStarred": true,
-            "tags": ["Inclusion-Exclusion", "Venn Diagrams"],
-            "statement": "This is a 2010 AMC 8 problem focusing on inclusion-exclusion and Venn diagrams. See the full problem statement on [AoPS](https://artofproblemsolving.com/wiki/index.php/2010_AMC_8_Problems/Problem_20).",
-            "solutionMetadata": {
-                "kind": "none"
-            }
-        },
-        {
-            "uniqueId": "amc8-2019-8",
-            "name": "Problem 8 (2019 AMC 8)",
-            "url": "https://artofproblemsolving.com/wiki/index.php/2019_AMC_8_Problems/Problem_8",
-            "source": "AMC 8",
-            "difficulty": "Easy",
-            "isStarred": false,
-            "tags": ["Inclusion-Exclusion", "Venn Diagrams" ],
-            "statement": "This is a 2019 AMC 8 problem focusing on inclusion-exclusion and Venn diagrams. See the full problem statement on [AoPS](https://artofproblemsolving.com/wiki/index.php/2019_AMC_8_Problems/Problem_8).",
-            "solutionMetadata": {
-                "kind": "none"
-            }
-        }
-    ]
+  "MODULE_ID": "inclusion-exclusion",
+  "practice": [
+    {
+      "uniqueId": "amc8-2017-24",
+      "name": "Problem 24 (2017 AMC 8)",
+      "url": "https://artofproblemsolving.com/wiki/index.php?title=2017_AMC_8_Problems/Problem_24",
+      "source": "AMC 8",
+      "difficulty": "Medium",
+      "isStarred": false,
+      "tags": [
+        "Inclusion-Exclusion",
+        "LCM"
+      ],
+      "statement": "Mrs. Sanders has three grandchildren, who call her regularly. One calls her every three days, one calls her every four days, and one calls her every five days. All three called her on December 31, 2016. On how many days during the next year did she not receive a phone call from any of her grandchildren?",
+      "solutionMetadata": {
+        "kind": "none"
+      }
+    },
+    {
+      "uniqueId": "amc8-2008-11",
+      "name": "Problem 11 (2008 AMC 8)",
+      "url": "https://artofproblemsolving.com/wiki/index.php?title=2008_AMC_8_Problems/Problem_11",
+      "source": "AMC 8",
+      "difficulty": "Easy",
+      "isStarred": false,
+      "tags": [
+        "Inclusion-Exclusion",
+        "Sets"
+      ],
+      "statement": "Each of the 39 students in the eighth grade at Lincoln Middle School has one dog or one cat or both a dog and a cat. Twenty students have a dog and 26 students have a cat. How many students have both a dog and a cat?",
+      "solutionMetadata": {
+        "kind": "none"
+      }
+    },
+    {
+      "uniqueId": "amc10b-2021-22",
+      "name": "Problem 22 (2021 AMC 10B)",
+      "url": "https://artofproblemsolving.com/wiki/index.php?title=2021_AMC_10B_Problems/Problem_22",
+      "source": "AMC 10",
+      "difficulty": "Hard",
+      "isStarred": false,
+      "tags": [
+        "Inclusion-Exclusion",
+        "Probability",
+        "Combinatorics"
+      ],
+      "statement": "Ang, Ben, and Jasmin each have 5 blocks, colored red, blue, yellow, white, and green; and there are 5 empty boxes. Each of the people randomly and independently of the other two people places one of their blocks into each box. The probability that at least one box receives blocks all of the same color is $\\frac{m}{n}$, where $m$ and $n$ are relatively prime positive integers. What is $m + n$?",
+      "solutionMetadata": {
+        "kind": "none"
+      }
+    },
+    {
+      "uniqueId": "aime2-2021-6",
+      "name": "Problem 6 (2021 AIME II)",
+      "url": "https://artofproblemsolving.com/wiki/index.php?title=2021_AIME_II_Problems/Problem_6",
+      "source": "AIME",
+      "difficulty": "Hard",
+      "isStarred": false,
+      "tags": [
+        "Inclusion-Exclusion",
+        "Sets",
+        "Counting"
+      ],
+      "statement": "For any finite set $S$, let $|S|$ denote the number of elements in $S$. Find the number of ordered pairs $(A, B)$ such that $A$ and $B$ are (not necessarily distinct) subsets of $\\{1, 2, 3, 4, 5\\}$ that satisfy\n$$|A| \\cdot |B| = |A \\cap B| \\cdot |A \\cup B|$$",
+      "solutionMetadata": {
+        "kind": "none"
+      }
+    },
+    {
+      "uniqueId": "ahsme-1991-30",
+      "name": "Problem 30 (1991 AHSME)",
+      "url": "https://artofproblemsolving.com/wiki/index.php?title=1991_AHSME_Problems/Problem_30",
+      "source": "AMC 12",
+      "difficulty": "Hard",
+      "isStarred": false,
+      "tags": [
+        "Inclusion-Exclusion",
+        "Sets",
+        "Counting"
+      ],
+      "statement": "For any set $S$, let $|S|$ denote the number of elements in $S$, and let $n(S)$ be the number of subsets of $S$, including the empty set and the set itself. If $A$, $B$, and $C$ are sets for which $n(A) + n(B) + n(C) = n(A \\cup B \\cup C)$ and $|A| = |B| = 100$, then what is the minimum possible value of $|A \\cap B \\cap C|$?",
+      "solutionMetadata": {
+        "kind": "none"
+      }
+    },
+    {
+      "uniqueId": "aime2-2013-9",
+      "name": "Problem 9 (2013 AIME II)",
+      "url": "https://artofproblemsolving.com/wiki/index.php?title=2013_AIME_II_Problems/Problem_9",
+      "source": "AIME",
+      "difficulty": "Hard",
+      "isStarred": false,
+      "tags": [
+        "Inclusion-Exclusion",
+        "Counting",
+        "Tiling"
+      ],
+      "statement": "A $7 \\times 1$ board is completely covered by $m \\times 1$ tiles without overlap; each tile may cover any number of consecutive squares, and each tile lies completely on the board. Each tile is either red, blue, or green. Let $N$ be the number of tilings of the $7 \\times 1$ board in which all three colors are used at least once. For example, a $1 \\times 1$ red tile followed by a $2 \\times 1$ green tile, a $1 \\times 1$ green tile, a $2 \\times 1$ blue tile, and a $1 \\times 1$ green tile is a valid tiling. Note that if the $2 \\times 1$ blue tile is replaced by two $1 \\times 1$ blue tiles, this results in a different tiling. Find the remainder when $N$ is divided by $1000$.",
+      "solutionMetadata": {
+        "kind": "none"
+      }
+    }
+  ]
 }
