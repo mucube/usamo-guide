@@ -1,4 +1,39 @@
 {
   "MODULE_ID": "cauchy-schwarz",
-  "practice": []
+  "practice": [
+    {
+      "uniqueId": "amc12b-2013-17",
+      "name": "Problem 17 (2013 AMC 12B)",
+      "url": "https://artofproblemsolving.com/wiki/index.php/2013_AMC_12B_Problems/Problem_17",
+      "source": "AMC 12",
+      "difficulty": "Hard",
+      "isStarred": false,
+      "tags": [
+        "Cauchy-Schwarz",
+        "Inequalities",
+        "Systems of Equations"
+      ],
+      "statement": "Real numbers $x$, $y$, and $z$ satisfy the equations $x + y + z = 1$ and $x^2 + y^2 + z^2 = 2$. What is the maximum value of $z$?",
+      "solutionMetadata": {
+        "kind": "none"
+      }
+    },
+    {
+      "uniqueId": "aime1-2024-7",
+      "name": "Problem 7 (2024 AIME I)",
+      "url": "https://artofproblemsolving.com/wiki/index.php/2024_AIME_I_Problems/Problem_7",
+      "source": "AIME",
+      "difficulty": "Hard",
+      "isStarred": false,
+      "tags": [
+        "Cauchy-Schwarz",
+        "Complex Numbers",
+        "Optimization"
+      ],
+      "statement": "Find the largest possible real part of $(75 + 117i)z + \\dfrac{96 + 144i}{z}$, where $z$ is a complex number with $|z| = 4$.",
+      "solutionMetadata": {
+        "kind": "none"
+      }
+    }
+  ]
 }
