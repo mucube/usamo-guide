@@ -1,4 +1,56 @@
 {
-  "MODULE_ID": "symmetric-polynomials",
-  "practice": []
+  "MODULE_ID": "symmetric-polynomial",
+  "practice": [
+    {
+      "uniqueId": "aime-1991-1",
+      "name": "Problem 1 (1991 AIME)",
+      "url": "https://artofproblemsolving.com/wiki/index.php/1991_AIME_Problems/Problem_1",
+      "source": "AIME",
+      "difficulty": "Easy",
+      "isStarred": false,
+      "tags": [
+        "Symmetric Polynomial",
+        "Vieta's Formulas",
+        "Systems of Equations"
+      ],
+      "statement": "Find $x^2 + y^2$ if $x$ and $y$ are positive integers such that $xy + x + y = 71$ and $x^2y + xy^2 = 880$.",
+      "solutionMetadata": {
+        "kind": "none"
+      }
+    },
+    {
+      "uniqueId": "amc12b-2005-23",
+      "name": "Problem 23 (2005 AMC 12B)",
+      "url": "https://artofproblemsolving.com/wiki/index.php/2005_AMC_12B_Problems/Problem_23",
+      "source": "AMC 12",
+      "difficulty": "Hard",
+      "isStarred": false,
+      "tags": [
+        "Symmetric Polynomial",
+        "Logarithms",
+        "Sum of Cubes"
+      ],
+      "statement": "Let $S$ be the set of ordered triples $(x, y, z)$ of real numbers for which $\\log_{10}(x+y) = z$ and $\\log_{10}(x^2+y^2) = z+1$. There are real numbers $a$ and $b$ such that for all ordered triples $(x,y,z)$ in $S$ we have $x^3+y^3 = a \\cdot 10^{3z} + b \\cdot 10^{2z}$. What is the value of $a+b$?",
+      "solutionMetadata": {
+        "kind": "none"
+      }
+    },
+    {
+      "uniqueId": "aime-1990-15",
+      "name": "Problem 15 (1990 AIME)",
+      "url": "https://artofproblemsolving.com/wiki/index.php/1990_AIME_Problems/Problem_15",
+      "source": "AIME",
+      "difficulty": "Hard",
+      "isStarred": false,
+      "tags": [
+        "Symmetric Polynomial",
+        "Newton's Identities",
+        "Recurrence Relations"
+      ],
+      "statement": "Find $ax^5 + by^5$ if the real numbers $a, b, x$, and $y$ satisfy the equations\n$$ax + by = 3, \\quad ax^2 + by^2 = 7, \\quad ax^3 + by^3 = 16, \\quad ax^4 + by^4 = 42.$$",
+      "solutionMetadata": {
+        "kind": "none"
+      }
+    }
+  ]
 }
