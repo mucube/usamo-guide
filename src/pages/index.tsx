@@ -237,7 +237,7 @@ export default function IndexPage({ path }): JSX.Element {
           />
         </svg>
       </div>
-      <div className="relative bg-gradient-to-b from-white via-orange-100 to-orange-50 dark:bg-gradient-to-b dark:from-[#2a1208] dark:via-[#e85d04]/20 dark:to-[#e85d04]/30 transition-colors duration-500">
+      <div className="relative bg-gradient-to-b from-white via-orange-100 to-orange-50 dark:bg-gradient-to-b dark:from-[#2a1208] dark:via-[#3a1d0f] dark:to-[#2d170c] transition-colors duration-500">
         {/* Stars System Section 
         <div className="pt-16 md:pt-24">
           <div className={containerClasses}>
@@ -299,6 +299,11 @@ export default function IndexPage({ path }): JSX.Element {
             >
               Learn new topics from a vetted list of high-quality resources. If
               one resource doesn't click, look at another!
+              <span className="mt-3 block">
+                <Link to="/foundations" className={linkTextStyles}>
+                  Explore Foundations Resources
+                </Link>
+              </span>
             </Feature>
 
             <div className="h-12 md:h-20 2xl:h-36"></div>
@@ -313,6 +318,11 @@ export default function IndexPage({ path }): JSX.Element {
             >
               Practice each topic with extensive problemsets and solutions
               covering a wide range of difficulties.
+              <span className="mt-3 block">
+                <Link to="/problems" className={linkTextStyles}>
+                  Go to Problems Page
+                </Link>
+              </span>
             </Feature>
           </div>
 
@@ -329,6 +339,11 @@ export default function IndexPage({ path }): JSX.Element {
             >
               Use our progress-tracking tools to track your progress in the Guide
               and stay motivated.
+              <span className="mt-3 block">
+                <Link to="/dashboard" className={linkTextStyles}>
+                  Open Dashboard
+                </Link>
+              </span>
             </Feature>
 
             <Feature
@@ -367,6 +382,7 @@ export default function IndexPage({ path }): JSX.Element {
           </div>
 
           <div className="h-16 md:h-20 2xl:h-36"></div>
+          <div className="pointer-events-none absolute inset-x-0 bottom-0 h-28 bg-linear-to-b from-transparent to-[#2d170c] opacity-90 blur-2xl dark:block" />
         </div>
       </div>
 
@@ -378,54 +394,60 @@ export default function IndexPage({ path }): JSX.Element {
         <div className="relative z-10">
           <div className="h-15 md:h-20"></div>
           <div className={containerClasses}>
-            <div className="invisible h-0 dark:visible dark:h-auto">
-              <GlowingText
-                className={classNames(headerClassesNoText, 'text-white')}
-                extraGlow
-              >
-              Join our Team.
-            </GlowingText>
-          </div>
-
-          <div className={headerSubtextSpacerClasses}></div>
-          <p className={subtextClasses}>
-            USAMO Guide is a student-run community dedicated to olympiad
-            mathematics. Join us to write lessons, curate problem sets, and grow
-            as a mentor alongside fellow contest enthusiasts.
-          </p>
-          <div className="h-8 md:h-12"></div>
-
-          <div className="group relative inline-block">
-            <GlowingRing>
-              <a
-                href="https://docs.google.com/document/d/13QpXqdiYQwjBLnywGL1FUG7GFdh8SM_1NigIkJl-A7k/edit?usp=sharing"
-                target="_blank"
-                rel="noreferrer"
-                className={classNames(whiteButtonClasses, 'inline-block shine-effect')}
-              >
-                Apply Now
-              </a>
-            </GlowingRing>
+            <div className="grid items-center gap-10 lg:grid-cols-12">
+              <div className="lg:col-span-7">
+                <h2
+                  className={classNames(
+                    headerClassesNoText,
+                    'text-left text-4xl md:text-5xl 2xl:text-6xl text-gray-900 dark:text-orange-100'
+                  )}
+                >
+                  Join our Team.
+                </h2>
+                <div className="h-5"></div>
+                <p className="max-w-2xl text-left text-lg leading-relaxed text-gray-700 md:text-xl dark:text-orange-100/75">
+                  USAMO Guide is a student-run community dedicated to olympiad
+                  mathematics. Join us to write lessons, curate problem sets,
+                  and grow as a mentor alongside fellow contest enthusiasts.
+                </p>
+                <div className="h-7 md:h-9"></div>
+                <a
+                  href="https://docs.google.com/document/d/13QpXqdiYQwjBLnywGL1FUG7GFdh8SM_1NigIkJl-A7k/edit?usp=sharing"
+                  target="_blank"
+                  rel="noreferrer"
+                  className="shine-effect inline-flex items-center rounded-full border-orange-600 bg-linear-to-br from-orange-300 to-orange-400 px-7 py-3 text-base font-bold text-white transition-all duration-300 hover:scale-105 hover:shadow-[0_0_20px_rgba(251,146,60,0.4)]"
+                >
+                  Apply Now
+                </a>
+              </div>
+              <div className="lg:col-span-5">
+                <div className="overflow-hidden rounded-2xl border border-orange-200/70 bg-white/70 shadow-sm dark:border-orange-500/20 dark:bg-[#15100c]/65">
+                  <StaticImage
+                    src="../assets/banner-image-big.png"
+                    alt="USAMO Guide team collaboration"
+                    placeholder="blurred"
+                    layout="constrained"
+                    className="w-full"
+                  />
+                </div>
+              </div>
+            </div>
           </div>
           <div className="h-15 md:h-20"></div>
         </div>
       </div>
-      </div>
 
       {/* Begin FAQ */}
       <div className="relative bg-white dark:[background:linear-gradient(to_bottom,rgba(15,10,5,1)_0%,rgba(18,12,7,1)_100%)]">
-        <div
-          className="pointer-events-none absolute inset-0 bg-repeat bg-center dark:opacity-12"
-          style={{ backgroundImage: "url('/images/math-doodles.png')" }}
-        />
+
         <div className="relative z-10 mx-auto max-w-(--breakpoint-xl) px-4 pt-12 pb-16 sm:px-6 sm:pt-16 sm:pb-20 lg:px-8 lg:pt-20 lg:pb-28">
           <h2 className={classNames(headerClasses, 'dark:text-gray-100 text-center')}>
             Frequently asked questions
           </h2>
           <div className="pt-10 md:pt-16">
-            <dl className="mx-auto grid max-w-6xl gap-10 text-center md:grid-cols-2 md:gap-8">
+            <dl className="mx-auto grid max-w-6xl gap-8 text-center md:grid-cols-2 md:gap-8">
               <div>
-                <div>
+                <div className="rounded-xl border border-gray-200 bg-white p-6 text-left shadow-sm dark:border-orange-500/20 dark:bg-[#1a130d]/75">
                   <dt className="text-lg leading-6 font-medium text-gray-900 dark:text-gray-100">
                     What are AMC, AIME, and USAMO?
                   </dt>
@@ -446,7 +468,7 @@ export default function IndexPage({ path }): JSX.Element {
                     </p>
                   </dd>
                 </div>
-                <div className="mt-12">
+                <div className="mt-6 rounded-xl border border-gray-200 bg-white p-6 text-left shadow-sm dark:border-orange-500/20 dark:bg-[#1a130d]/75">
                   <dt className="text-lg leading-6 font-medium text-gray-900 dark:text-gray-100">
                     Is this an official syllabus?
                   </dt>
@@ -458,7 +480,7 @@ export default function IndexPage({ path }): JSX.Element {
                     </p>
                   </dd>
                 </div>
-                <div className="mt-12">
+                <div className="mt-6 rounded-xl border border-gray-200 bg-white p-6 text-left shadow-sm dark:border-orange-500/20 dark:bg-[#1a130d]/75">
                   <dt className="text-lg leading-6 font-medium text-gray-900 dark:text-gray-100">
                     How do I report a problem or ask a question?
                   </dt>
@@ -477,7 +499,7 @@ export default function IndexPage({ path }): JSX.Element {
                     </p>
                   </dd>
                 </div>
-                <div className="mt-12">
+                <div className="mt-6 rounded-xl border border-gray-200 bg-white p-6 text-left shadow-sm dark:border-orange-500/20 dark:bg-[#1a130d]/75">
                   <dt className="text-lg leading-6 font-medium text-gray-900 dark:text-gray-100">
                     I'm looking for classes, club curriculum...
                   </dt>
@@ -489,8 +511,8 @@ export default function IndexPage({ path }): JSX.Element {
                   </dd>
                 </div>
               </div>
-              <div className="mt-12 md:mt-0">
-                <div>
+              <div className="mt-6 md:mt-0">
+                <div className="rounded-xl border border-gray-200 bg-white p-6 text-left shadow-sm dark:border-orange-500/20 dark:bg-[#1a130d]/75">
                   <dt className="text-lg leading-6 font-medium text-gray-900 dark:text-gray-100">
                     Is this guide only for USAMO qualifiers?
                   </dt>
@@ -501,7 +523,7 @@ export default function IndexPage({ path }): JSX.Element {
                     </p>
                   </dd>
                 </div>
-                <div className="mt-12">
+                <div className="mt-6 rounded-xl border border-gray-200 bg-white p-6 text-left shadow-sm dark:border-orange-500/20 dark:bg-[#1a130d]/75">
                   <dt className="text-lg leading-6 font-medium text-gray-900 dark:text-gray-100">
                     How can I get help?
                   </dt>
@@ -520,7 +542,7 @@ export default function IndexPage({ path }): JSX.Element {
                     </p>
                   </dd>
                 </div>
-                <div className="mt-12">
+                <div className="mt-6 rounded-xl border border-gray-200 bg-white p-6 text-left shadow-sm dark:border-orange-500/20 dark:bg-[#1a130d]/75">
                   <dt className="text-lg leading-6 font-medium text-gray-900 dark:text-gray-100">
                     How can I contribute?
                   </dt>
@@ -539,7 +561,7 @@ export default function IndexPage({ path }): JSX.Element {
                     </p>
                   </dd>
                 </div>
-                <div className="mt-12">
+                <div className="mt-6 rounded-xl border border-gray-200 bg-white p-6 text-left shadow-sm dark:border-orange-500/20 dark:bg-[#1a130d]/75">
                   <dt className="text-lg leading-6 font-medium text-gray-900 dark:text-gray-100">
                     Is this open source?
                   </dt>

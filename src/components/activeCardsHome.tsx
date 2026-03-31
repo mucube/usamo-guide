@@ -60,7 +60,8 @@ const ActiveCardsHome = () => {
     const [activeCard, setActiveCard] = useState(0);
 
   return (
-    <div className="relative overflow-x-hidden bg-gradient-to-b from-orange-50 via-amber-50 to-white transition-colors duration-500 dark:bg-linear-to-b dark:from-[#e85d04]/40 dark:via-[#9a4209] dark:to-[#fb923c]/40">
+    <div className="relative overflow-x-hidden bg-gradient-to-b from-orange-50 via-amber-50 to-white transition-colors duration-500 dark:bg-[linear-gradient(to_bottom,#2d170c_0%,#26170d_18%,#21150e_48%,#1b140f_100%)]">
+          <div className="pointer-events-none absolute inset-x-0 top-0 h-32 bg-linear-to-b from-[#3a1d10]/60 via-[#2d170c]/35 to-transparent blur-3xl dark:block" />
           <div className="h-16 md:h-20 2xl:h-36"></div>
             <div className="px-4 sm:px-6 lg:px-8 2xl:px-16">
               <h2 className={classNames(headerClasses, 'md:text-center')}>

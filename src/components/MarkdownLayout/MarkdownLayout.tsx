@@ -22,12 +22,12 @@ import ModuleHeaders from './ModuleHeaders/ModuleHeaders';
 import ModuleProgressUpdateBanner from './ModuleProgressUpdateBanner';
 import NavBar from './NavBar';
 import NotSignedInWarning from './NotSignedInWarning';
+import ScrollProgressButton from './ScrollProgressButton';
 import TableOfContentsBlock from './TableOfContents/TableOfContentsBlock';
-import TableOfContentsSidebar from './TableOfContents/TableOfContentsSidebar';
 
-const ContentContainer = ({ children, tableOfContents }) => (
+const ContentContainer = ({ children }) => (
   <main
-    className="relative overflow-x-hidden pt-6 focus:outline-hidden lg:pt-2 2xl:h-screen 2xl:overflow-hidden"
+    className="relative overflow-x-hidden pt-6 focus:outline-hidden lg:pt-2"
     tabIndex={0}
   >
     <div className="mx-auto">
@@ -37,12 +37,7 @@ const ContentContainer = ({ children, tableOfContents }) => (
           className="order-1 hidden shrink-0 lg:block"
           style={{ width: '20rem' }}
         />
-        <div className="order-3 hidden w-72 shrink-0 2xl:flex 2xl:items-center 2xl:justify-center">
-          <div className="w-full px-3">
-            <TableOfContentsSidebar tableOfContents={tableOfContents} />
-          </div>
-        </div>
-        <div className="order-2 w-0 max-w-6xl min-w-0 flex-1 overflow-x-auto px-4 sm:px-6 lg:px-8 2xl:max-h-screen 2xl:overflow-y-auto">
+        <div className="order-2 w-0 min-w-0 flex-1 overflow-x-auto px-5 sm:px-8 lg:px-10 xl:px-12">
           <div className="hidden lg:block">
             <NavBar />
             <div className="h-8" />
@@ -162,28 +157,23 @@ export default function MarkdownLayout({
       <ProblemSuggestionModalProvider>
         <MobileSideNav />
         <DesktopSidebar />
+        <ScrollProgressButton />
 
         <div className="w-full">
           <MobileAppBar />
 
-          <ContentContainer tableOfContents={tableOfContents}>
+          <ContentContainer>
             <NotSignedInWarning />
 
             <ModuleHeaders moduleLinks={moduleLinks} />
 
-            <div className={tableOfContents.length > 1 ? '2xl:hidden' : ''}>
-              <TableOfContentsBlock tableOfContents={tableOfContents} />
-            </div>
+            <TableOfContentsBlock tableOfContents={tableOfContents} />
 
             {children}
 
             <ModuleProgressUpdateBanner />
 
             <ForumCTA />
-
-            {/*<div className="my-8">*/}
-            {/*  <ModuleFeedback markdownData={markdownData} />*/}
-            {/*</div>*/}
           </ContentContainer>
         </div>
       </ProblemSuggestionModalProvider>

@@ -48,33 +48,11 @@ export default function ProblemsPage(props: PageProps<DataProps>) {
   const [random, sendRandom] = useState(0);
   const selectionMetadata: SelectionProps[] = [
     {
-      attribute: 'difficulty',
-      limit: 500,
-      placeholder: 'Difficulty',
-      searchable: false,
-      isMulti: true,
-    },
-    {
       attribute: 'problemModules.title',
       limit: 500,
       placeholder: 'Modules',
       searchable: true,
       isMulti: true,
-    },
-    {
-      attribute: 'source',
-      limit: 500,
-      placeholder: 'Source',
-      searchable: true,
-      isMulti: true,
-    },
-    {
-      attribute: 'isStarred',
-      limit: 500,
-      placeholder: 'Starred',
-      searchable: false,
-      transformLabel: label => (label == 'true' ? 'Yes' : 'No'),
-      isMulti: false,
     },
     {
       attribute: 'problemModules.id',
@@ -128,7 +106,7 @@ export default function ProblemsPage(props: PageProps<DataProps>) {
           future={{ preserveSharedStateOnUnmount: true }}
         >
           <div className="grid grid-cols-12 gap-x-6 px-6 pb-6 lg:px-9">
-            <aside className="col-span-12 pt-6 sm:col-span-4 md:col-span-3 lg:col-span-2 xl:col-span-2">
+            <aside className="col-span-12 pt-6 sm:col-span-4 md:col-span-3 lg:col-span-2 xl:col-span-2 hidden sm:block">
               <div className="mb-4">
                 <BlindModeToggle />
               </div>
