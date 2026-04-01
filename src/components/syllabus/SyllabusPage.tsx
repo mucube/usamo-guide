@@ -233,15 +233,15 @@ export default function SyllabusPage({
                 key={category.name}
                 className="group/category flex flex-col rounded-2xl border border-orange-100/70 bg-white/70 p-4 shadow-sm transition hover:border-orange-200 md:flex-row dark:border-white/10 dark:bg-white/5"
               >
-                <div className="flex-1 pr-12 md:text-right">
-                  <h2 className="py-3 text-2xl leading-6 font-semibold text-slate-600 transition group-hover/category:text-slate-900 dark:text-slate-300 dark:group-hover/category:text-slate-100">
+                <div className="flex flex-1 flex-col items-center justify-center pr-0 text-center md:pr-12">
+                  <h2 className="py-3 text-2xl leading-tight font-bold tracking-tight text-slate-700 transition group-hover/category:text-slate-900 md:text-3xl dark:text-slate-200 dark:group-hover/category:text-white">
                     {category.name}
                   </h2>
-                  <div className="py-3 leading-6 text-slate-500 transition group-hover/category:text-slate-800 dark:text-slate-400 dark:group-hover/category:text-slate-200">
+                  <div className="py-2 leading-6 text-slate-500 transition group-hover/category:text-slate-800 dark:text-slate-400 dark:group-hover/category:text-slate-200">
                     {/* eslint-disable-next-line react-hooks/rules-of-hooks */}
                     {useProgressBarForCategory(category)}
                   </div>
-                  <p className="text-slate-500 transition group-hover/category:text-slate-700 md:ml-auto md:max-w-sm dark:text-slate-400 dark:group-hover/category:text-slate-200">
+                  <p className="max-w-sm text-sm text-slate-500 transition group-hover/category:text-slate-700 dark:text-slate-400 dark:group-hover/category:text-slate-200">
                     {category.description}
                   </p>
                 </div>

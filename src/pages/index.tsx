@@ -139,7 +139,7 @@ export default function IndexPage({ path }): JSX.Element {
               <h1
                 className={classNames(
                   usamoTitleClasses,
-                  'mx-auto h-0 w-full max-w-4xl flex-row items-center justify-center leading-20 font-semibold dark:visible dark:h-auto'
+                  'mx-auto h-0 w-full max-w-4xl flex-row items-center justify-center pb-4 leading-snug font-semibold dark:visible dark:h-auto'
                 )}
               >
                 A Clear Roadmap from
@@ -159,7 +159,7 @@ export default function IndexPage({ path }): JSX.Element {
             <div className="flex flex-wrap justify-center gap-4 sm:gap-10">
               <Link
                 to="/dashboard"
-                className="shine-effect inline-block rounded-full border-orange-600 bg-linear-to-br from-orange-300 to-orange-400 px-8 py-3 text-[16px] font-bold text-white transition-all duration-300 hover:scale-105 hover:shadow-[0_0_20px_rgba(251,146,60,0.4)]"
+                className="shine-effect inline-flex items-center justify-center rounded-full border-orange-600 bg-linear-to-br from-orange-300 to-orange-400 px-8 py-3 text-[16px] font-bold leading-none text-white transition-all duration-300 hover:scale-105 hover:shadow-[0_0_20px_rgba(251,146,60,0.4)]"
               >
                 Start Learning {'>'}
               </Link>
@@ -275,7 +275,7 @@ export default function IndexPage({ path }): JSX.Element {
           </p>
 
           <div className="h-12 md:h-20 2xl:h-36"></div>
-          <div className="lg:flex gap-2">
+          <div className="grid gap-6 lg:grid-cols-2">
             <Feature
               iconSrc="/images/feature-resources.png"
               iconFallbackSrc="https://i.ibb.co/TD2gjPwB/feature-resources.png"
@@ -294,8 +294,6 @@ export default function IndexPage({ path }): JSX.Element {
                 </Link>
               </span>
             </Feature>
-
-            <div className="h-12 md:h-20 2xl:h-36"></div>
 
             <Feature
               iconSrc="/images/feature-problemsets.png"
@@ -318,7 +316,7 @@ export default function IndexPage({ path }): JSX.Element {
           </div>
 
           <div className="h-6 md:h-10 2xl:h-24"></div>
-          <div className='lg:grid grid-cols-5 gap-4'>
+          <div className="grid gap-6 lg:grid-cols-2">
             <Feature
               iconSrc="/images/feature-progress.png"
               iconFallbackSrc="https://i.ibb.co/hJbCbhn9/feature-progress.png"
@@ -328,7 +326,6 @@ export default function IndexPage({ path }): JSX.Element {
               blobClasses="bg-orange-200 dark:bg-orange-800"
               feature={<ProgressTrackingFeature />}
               fade="none"
-              className='col-start-1 col-end-4 mb-6'
             >
               Use our progress-tracking tools to track your progress in the Guide
               and stay motivated.
@@ -346,7 +343,6 @@ export default function IndexPage({ path }): JSX.Element {
               iconClasses="from-black to-black"
               title="Help when you need it"
               blobClasses="bg-green-200 dark:bg-green-800"
-              className='col-span-5 md:col-start-4 md:col-end-6'
               feature={
                 <div className="rounded-lg shadow-lg">
                   <StaticImage
