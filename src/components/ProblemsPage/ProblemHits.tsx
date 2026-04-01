@@ -1,4 +1,4 @@
-import { Link, navigate } from 'gatsby';
+import { Link } from 'gatsby';
 import { BaseHit, Hit } from 'instantsearch.js';
 import * as React from 'react';
 import { Highlight, useHits } from 'react-instantsearch';
@@ -44,19 +44,19 @@ function ProblemHit({ hit }: ProblemHitProps) {
     uniqueId: hit.objectID,
   });
 
-  const navigateToProblem = () => {
-    navigate(problemUrl);
+  const openProblemInNewTab = () => {
+    window.open(problemUrl, '_blank', 'noopener,noreferrer');
   };
 
   return (
     <div
-      onClick={navigateToProblem}
+      onClick={openProblemInNewTab}
       role="link"
       tabIndex={0}
       onKeyDown={e => {
         if (e.key === 'Enter' || e.key === ' ') {
           e.preventDefault();
-          navigateToProblem();
+          openProblemInNewTab();
         }
       }}
       className="problem-card relative rounded-xl border border-white/20 bg-white/40 p-4 ring-1 ring-white/30 backdrop-blur-sm transition hover:-translate-y-0.5 hover:shadow-2xl hover:bg-white/50 dark:border-slate-700/80 dark:bg-slate-900/40 dark:ring-white/10 dark:hover:bg-slate-900/60"
@@ -210,8 +210,10 @@ export default function ProblemHits({ shuffle, random }) {
       }
 
       if (unsolvedPaths.length > 0) {
-        navigate(
-          unsolvedPaths[Math.floor(Math.random() * unsolvedPaths.length)]
+        window.open(
+          unsolvedPaths[Math.floor(Math.random() * unsolvedPaths.length)],
+          '_blank',
+          'noopener,noreferrer'
         );
       }
     }
