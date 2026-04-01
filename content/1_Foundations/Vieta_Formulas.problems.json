@@ -47,7 +47,7 @@
       "Quadratic",
       "Vieta's Formulas"
     ],
-    "statement": "What is the sum of the reciprocals of the roots of the equation 2x^2 - 5x + 7 = 0?",
+    "statement": "What is the sum of the reciprocals of the roots of the equation $\frac{2003}{2004}x+1+\frac{1}{x}=0$?",
     "solutionMetadata": {
       "kind": "none"
     }
@@ -77,7 +77,7 @@
       "Absolute Value",
       "Equations"
     ],
-    "statement": "What is the sum of all real numbers x for which (x - 1)^2 = |x - 1| + 2?",
+    "statement": "What is the sum of all real numbers $x$ for which $|x^2-12x+34|=2?$",
     "solutionMetadata": {
       "kind": "none"
     }

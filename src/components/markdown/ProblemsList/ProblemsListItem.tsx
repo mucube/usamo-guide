@@ -79,6 +79,8 @@ export default function ProblemsListItem(
         )}
         <Link
           to={getProblemURL(problem)}
+          target="_blank"
+          rel="noopener noreferrer"
           className={
             (isDivisionTable == false && problem.isStarred
               ? 'pl-1 sm:pl-2'
