@@ -60,7 +60,7 @@ export default function AetherFlowHero(): JSX.Element {
 
       {/* ── Top left info stack ── */}
       <div className="relative z-10 px-6 pt-6 md:px-10">
-        <div className="flex max-w-2xl flex-col items-start gap-3">
+        <div className="inline-flex flex-col items-center gap-3">
           <div className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/[0.06] px-4 py-2 font-mono text-[11px] font-bold uppercase tracking-[0.24em] text-[#F5F0FA] backdrop-blur-md">
             <img
               src="/images/discord.svg"
@@ -135,7 +135,7 @@ export default function AetherFlowHero(): JSX.Element {
       </div>
 
       {/* ── Bottom bar ── */}
-      <div className="relative z-10 px-12 pb-12 pt-6 ml-auto flex max-w-2xl flex-col items-end gap-3 text-right">
+      <div className="relative z-10 px-12 pb-12 pt-6 ml-auto flex max-w-2xl flex-col items-center gap-3 text-right">
         {/* Bottom-right: Open source */}
         <div className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/[0.06] px-4 py-2 font-mono text-[11px] font-bold uppercase tracking-[0.24em] text-[#F5F0FA] backdrop-blur-md">
           <svg viewBox="0 0 16 16" className="h-4 w-4 flex-shrink-0 fill-current" aria-hidden="true">

@@ -91,8 +91,10 @@ const ActiveCardsHome = () => {
                       : 'hover:border-white/15'
                   )}
                   style={{
-                    borderColor: activeCard === id ? 'rgba(240, 194, 255, 0.32)' : BORDER_STRONG,
-                    background: activeCard === id ? 'rgba(244, 237, 234, 0.10)' : 'rgba(244, 237, 234, 0.05)',
+                    borderColor: activeCard === id ? 'rgba(229, 194, 255, 0.3)' : 'rgba(229, 194, 255, 0.12)',
+                    background: activeCard === id
+                      ? 'linear-gradient(180deg, rgba(60, 40, 90, 0.95) 0%, rgba(40, 25, 60, 0.97) 100%)'
+                      : 'linear-gradient(180deg, rgba(54, 37, 72, 0.9) 0%, rgba(31, 22, 42, 0.94) 100%)',
                   }}
                 >
                         {activeCard===id && (
@@ -155,8 +157,8 @@ const ActiveCardsHome = () => {
                     'relative h-full w-full max-w-full overflow-hidden rounded-2xl p-12 shadow-sm backdrop-blur-sm md:p-10'
                   )}
                   style={{
-                    border: `1px solid ${BORDER_STRONG}`,
-                    background: 'rgba(244, 237, 234, 0.08)',
+                    border: '1px solid rgba(229, 194, 255, 0.12)',
+                    background: 'linear-gradient(180deg, rgba(54, 37, 72, 0.9) 0%, rgba(31, 22, 42, 0.94) 100%)',
                   }}
                 >
                     <div className="max-w-2xl relative z-10">

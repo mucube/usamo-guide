@@ -254,7 +254,6 @@ export default function DashboardPage(props: PageProps) {
         style={{
           backgroundImage: MIDNIGHT_GRADIENT,
           color: VANILLA,
-          '--ui-page-bg-image': 'url(/images/math-doodles.png)',
         } as React.CSSProperties}
       >
         <TopNavigationBar linkLogoToIndex={true} redirectToDashboard={false} />
@@ -293,12 +292,14 @@ export default function DashboardPage(props: PageProps) {
                             <button
                               type="button"
                               onClick={() => signIn()}
-                              className="mt-4 inline-flex items-center justify-center rounded-md border px-4 py-2 text-sm font-medium transition hover:opacity-95"
+                              className="purple-motion-effect mt-4 inline-flex items-center justify-center rounded-full px-6 py-2 font-mono text-sm font-bold leading-tight"
                               style={{
-                                borderColor: 'rgba(112, 66, 138, 0.46)',
-                                backgroundColor: '#70428A',
-                                color: VANILLA,
-                              }}
+                                border: '1px solid rgba(240, 194, 255, 0.34)',
+                                background: 'linear-gradient(135deg, #5A2F87 0%, #C58BFF 100%)',
+                                '--pme-color': '#F4EDEA',
+                                '--pme-hover-color': '#201C36',
+                                '--pme-wipe-bg': '#F0C2FF',
+                              } as React.CSSProperties}
                             >
                               Save Progress
                             </button>
@@ -346,11 +347,11 @@ export default function DashboardPage(props: PageProps) {
               </div>
               <div className="mt-6 flex">
                 <Link
-                  className="purple-motion-effect inline-flex w-full items-center justify-center rounded-md px-5 py-3 text-base font-medium transition"
+                  className="purple-motion-effect inline-flex w-full items-center justify-center rounded-full px-5 py-3 font-mono text-base font-bold leading-tight"
                   style={{
                     border: '1px solid rgba(240, 194, 255, 0.34)',
-                    background: 'var(--accent-gradient)',
-                    '--pme-color': '#201C36',
+                    background: 'linear-gradient(135deg, #5A2F87 0%, #C58BFF 100%)',
+                    '--pme-color': '#F4EDEA',
                     '--pme-hover-color': '#201C36',
                     '--pme-wipe-bg': '#F0C2FF',
                   } as React.CSSProperties}
@@ -366,14 +367,14 @@ export default function DashboardPage(props: PageProps) {
               </div>
             </div>
             <header>
-              <div className="mx-auto max-w-screen-2xl px-4 sm:px-6 lg:px-4">
+              <div className="mx-auto max-w-screen-2xl px-8">
                 <h1 className="text-3xl leading-tight font-bold" style={{ color: VANILLA }}>
                   Statistics
                 </h1>
               </div>
             </header>
             <div className="mx-auto max-w-screen-2xl">
-              <div className="space-y-8 py-4 sm:px-6 lg:grid lg:grid-cols-2 lg:gap-8 lg:space-y-0 lg:px-4">
+              <div className="space-y-8 py-4 px-8 lg:grid lg:grid-cols-2 lg:gap-8 lg:space-y-0 lg:px-8">
                 <div className="space-y-8">
                   {renderStatsTile(
                     `Modules Progress - ${SECTION_LABELS[lastViewedSection]}`,

@@ -59,7 +59,11 @@ function ProblemHit({ hit }: ProblemHitProps) {
           openProblemInNewTab();
         }
       }}
-      className="group relative cursor-pointer overflow-hidden rounded-2xl border border-[rgba(210,212,200,0.14)] bg-[rgba(244,237,234,0.05)] p-4 transition-all duration-300 hover:-translate-y-1 hover:border-[rgba(101,86,141,0.45)] hover:shadow-[0_16px_40px_rgba(101,86,141,0.18)]"
+      className="group relative cursor-pointer overflow-hidden rounded-2xl p-4 shadow-lg transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_16px_40px_rgba(101,86,141,0.28)]"
+      style={{
+        border: '1px solid rgba(229, 194, 255, 0.12)',
+        background: 'linear-gradient(180deg, rgba(54, 37, 72, 0.9) 0%, rgba(31, 22, 42, 0.94) 100%)',
+      }}
     >
       <div
         className="pointer-events-none absolute inset-0 rounded-2xl opacity-0 transition-opacity duration-300 group-hover:opacity-100"

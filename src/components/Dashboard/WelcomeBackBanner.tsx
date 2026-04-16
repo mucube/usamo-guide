@@ -7,10 +7,10 @@ export default function WelcomeBackBanner({
 }) {
   return (
     <div
-      className="w-full shadow-sm lg:rounded-lg"
+      className="w-full shadow-lg lg:rounded-2xl"
       style={{
-        border: '1px solid rgba(240, 194, 255, 0.24)',
-        background: 'rgba(244, 237, 234, 0.08)',
+        border: '1px solid rgba(229, 194, 255, 0.12)',
+        background: 'linear-gradient(180deg, rgba(54, 37, 72, 0.9) 0%, rgba(31, 22, 42, 0.94) 100%)',
       }}
     >
       <Link
@@ -37,12 +37,14 @@ export default function WelcomeBackBanner({
         <div className="mt-5 sm:mt-0 sm:ml-6 sm:flex sm:shrink-0 sm:items-center lg:mr-2">
           <span className="inline-flex rounded-md shadow-sm">
             <span
-              className="inline-flex items-center rounded-md border px-4 py-2 text-sm font-medium transition duration-150 ease-in-out focus:outline-hidden sm:text-base lg:px-8 lg:py-3 lg:text-lg"
+              className="purple-motion-effect inline-flex items-center justify-center rounded-full px-6 py-2 font-mono text-sm font-bold leading-tight sm:text-base lg:px-8 lg:py-3"
               style={{
-                borderColor: 'rgba(112, 66, 138, 0.55)',
-                backgroundColor: '#70428A',
-                color: '#F4EDEA',
-              }}
+                border: '1px solid rgba(240, 194, 255, 0.34)',
+                background: 'linear-gradient(135deg, #5A2F87 0%, #C58BFF 100%)',
+                '--pme-color': '#F4EDEA',
+                '--pme-hover-color': '#201C36',
+                '--pme-wipe-bg': '#F0C2FF',
+              } as React.CSSProperties}
             >
               {lastViewedModuleURL
                 ? `Continue: ${lastViewedModuleLabel}`

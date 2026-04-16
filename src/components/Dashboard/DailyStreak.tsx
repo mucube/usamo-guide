@@ -38,14 +38,14 @@ const PhotoCard = ({ text, day, tomorrowMilliseconds, hiddenOnDesktop }) => {
   return (
     <div
       className={
-        'mx-auto mb-8 max-w-[592px]' + (hiddenOnDesktop ? ' lg:hidden' : '')
+        'mb-8 w-full' + (hiddenOnDesktop ? ' lg:hidden' : '')
       }
     >
       <div
-        className="flex flex-col overflow-hidden shadow-sm sm:rounded-lg"
+        className="flex flex-col overflow-hidden shadow-lg sm:rounded-2xl"
         style={{
-          border: '1px solid rgba(240, 194, 255, 0.24)',
-          background: 'rgba(244, 237, 234, 0.08)',
+          border: '1px solid rgba(229, 194, 255, 0.12)',
+          background: 'linear-gradient(180deg, rgba(54, 37, 72, 0.9) 0%, rgba(31, 22, 42, 0.94) 100%)',
         }}
       >
         <div className="px-4 pt-5 pb-4 sm:px-6 sm:pt-6">
@@ -133,7 +133,7 @@ export default function DailyStreak({ streak }) {
       return (
         <div className="mb-8" key={times.length}>
           <div
-            className="flex flex-col overflow-hidden shadow-sm sm:rounded-lg"
+            className="flex flex-col overflow-hidden shadow-lg sm:rounded-2xl"
             style={{
               border: '1px solid rgba(240, 194, 255, 0.24)',
               background: 'rgba(244, 237, 234, 0.08)',
@@ -188,10 +188,10 @@ export default function DailyStreak({ streak }) {
   return (
     <>
       <div
-        className="overflow-hidden shadow-sm sm:rounded-lg lg:col-span-2"
+        className="overflow-hidden shadow-lg sm:rounded-2xl lg:col-span-2"
         style={{
-          border: '1px solid rgba(240, 194, 255, 0.24)',
-          background: 'rgba(244, 237, 234, 0.08)',
+          border: '1px solid rgba(229, 194, 255, 0.12)',
+          background: 'linear-gradient(180deg, rgba(54, 37, 72, 0.9) 0%, rgba(31, 22, 42, 0.94) 100%)',
         }}
       >
         <div className="px-4 py-5 sm:p-6">

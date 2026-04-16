@@ -39,11 +39,7 @@ const VANILLA = '#F4EDEA';
 const MAUVE = '#F0C2FF';
 
 
-/** sampled from image2 (approx) */
-const PURPLE_FROM_IMAGE2 = '#70428A';
 
-
-const BORDER_STRONG = 'rgba(240, 194, 255, 0.26)';
 const TEXT_PRIMARY = VANILLA;
 const TEXT_SECONDARY = 'rgba(244, 237, 234, 0.78)';
 const TEXT_MUTED = 'rgba(244, 237, 234, 0.62)';
@@ -123,11 +119,9 @@ export default function IndexPage({ path }): JSX.Element {
   const sectionSubtitleClasses =
     'mx-auto max-w-3xl text-center text-lg font-medium leading-relaxed md:text-xl 2xl:text-2xl';
   const infoCardStyle: React.CSSProperties = {
-    border: `1px solid ${BORDER_STRONG}`,
-    background: 'rgba(244, 237, 234, 0.08)',
+    border: '1px solid rgba(229, 194, 255, 0.12)',
+    background: 'linear-gradient(180deg, rgba(54, 37, 72, 0.9) 0%, rgba(31, 22, 42, 0.94) 100%)',
     color: TEXT_PRIMARY,
-    backdropFilter: 'blur(16px)',
-    WebkitBackdropFilter: 'blur(16px)',
   };
 
 
@@ -376,13 +370,13 @@ export default function IndexPage({ path }): JSX.Element {
                     href="https://docs.google.com/document/d/1AUNOq6OlVcSZN_gUPfvyhimlh9hA4GNvNaLdzyflX_8/edit?usp=sharing"
                     target="_blank"
                     rel="noreferrer"
-                    className="purple-motion-effect inline-flex items-center rounded-full px-7 py-3 text-base font-bold transition"
+                    className="purple-motion-effect inline-flex items-center justify-center rounded-full px-7 py-3 font-mono text-base font-bold leading-tight"
                     style={{
-                      border: `1px solid rgba(112, 66, 138, 0.55)`,
-                      backgroundColor: PURPLE_FROM_IMAGE2,
-                      '--pme-color': VANILLA,
+                      border: '1px solid rgba(240, 194, 255, 0.34)',
+                      background: 'linear-gradient(135deg, #5A2F87 0%, #C58BFF 100%)',
+                      '--pme-color': '#F4EDEA',
                       '--pme-hover-color': '#201C36',
-                      '--pme-wipe-bg': '#F7DEFF',
+                      '--pme-wipe-bg': '#F0C2FF',
                     } as React.CSSProperties}
                   >
                     Apply Now
@@ -428,7 +422,7 @@ export default function IndexPage({ path }): JSX.Element {
             <RevealSection delay={100}>
             <dl className="mx-auto grid max-w-6xl gap-8 text-center md:grid-cols-2 md:gap-8">
               <div>
-                <div className="rounded-xl p-6 text-left shadow-sm" style={infoCardStyle}>
+                <div className="rounded-2xl p-6 text-left shadow-lg" style={infoCardStyle}>
                   <dt className="text-lg leading-6 font-medium" style={{ color: TEXT_PRIMARY }}>
                     What are AMC, AIME, and USAMO?
                   </dt>
@@ -449,7 +443,7 @@ export default function IndexPage({ path }): JSX.Element {
                     </p>
                   </dd>
                 </div>
-                <div className="mt-6 rounded-xl p-6 text-left shadow-sm" style={infoCardStyle}>
+                <div className="mt-6 rounded-2xl p-6 text-left shadow-lg" style={infoCardStyle}>
                   <dt className="text-lg leading-6 font-medium" style={{ color: TEXT_PRIMARY }}>
                     Is this an official syllabus?
                   </dt>
@@ -461,7 +455,7 @@ export default function IndexPage({ path }): JSX.Element {
                     </p>
                   </dd>
                 </div>
-                <div className="mt-6 rounded-xl p-6 text-left shadow-sm" style={infoCardStyle}>
+                <div className="mt-6 rounded-2xl p-6 text-left shadow-lg" style={infoCardStyle}>
                   <dt className="text-lg leading-6 font-medium" style={{ color: TEXT_PRIMARY }}>
                     How do I report a problem or ask a question?
                   </dt>
@@ -480,7 +474,7 @@ export default function IndexPage({ path }): JSX.Element {
                     </p>
                   </dd>
                 </div>
-                <div className="mt-6 rounded-xl p-6 text-left shadow-sm" style={infoCardStyle}>
+                <div className="mt-6 rounded-2xl p-6 text-left shadow-lg" style={infoCardStyle}>
                   <dt className="text-lg leading-6 font-medium" style={{ color: TEXT_PRIMARY }}>
                     I'm looking for classes, club curriculum...
                   </dt>
@@ -493,7 +487,7 @@ export default function IndexPage({ path }): JSX.Element {
                 </div>
               </div>
               <div className="mt-6 md:mt-0">
-                <div className="rounded-xl p-6 text-left shadow-sm" style={infoCardStyle}>
+                <div className="rounded-2xl p-6 text-left shadow-lg" style={infoCardStyle}>
                   <dt className="text-lg leading-6 font-medium" style={{ color: TEXT_PRIMARY }}>
                     Is this guide only for USAMO qualifiers?
                   </dt>
@@ -504,7 +498,7 @@ export default function IndexPage({ path }): JSX.Element {
                     </p>
                   </dd>
                 </div>
-                <div className="mt-6 rounded-xl p-6 text-left shadow-sm" style={infoCardStyle}>
+                <div className="mt-6 rounded-2xl p-6 text-left shadow-lg" style={infoCardStyle}>
                   <dt className="text-lg leading-6 font-medium" style={{ color: TEXT_PRIMARY }}>
                     How can I get help?
                   </dt>
@@ -523,7 +517,7 @@ export default function IndexPage({ path }): JSX.Element {
                     </p>
                   </dd>
                 </div>
-                <div className="mt-6 rounded-xl p-6 text-left shadow-sm" style={infoCardStyle}>
+                <div className="mt-6 rounded-2xl p-6 text-left shadow-lg" style={infoCardStyle}>
                   <dt className="text-lg leading-6 font-medium" style={{ color: TEXT_PRIMARY }}>
                     How can I contribute?
                   </dt>
@@ -542,7 +536,7 @@ export default function IndexPage({ path }): JSX.Element {
                     </p>
                   </dd>
                 </div>
-                <div className="mt-6 rounded-xl p-6 text-left shadow-sm" style={infoCardStyle}>
+                <div className="mt-6 rounded-2xl p-6 text-left shadow-lg" style={infoCardStyle}>
                   <dt className="text-lg leading-6 font-medium" style={{ color: TEXT_PRIMARY }}>
                     Is this open source?
                   </dt>

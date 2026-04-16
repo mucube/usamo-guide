@@ -175,11 +175,11 @@ export default function ProblemsPage(props: PageProps<DataProps>) {
                   <div className="flex flex-wrap justify-center gap-3">
                     <button
                       onClick={() => sendShuffle(shuffle + 1)}
-                      className="purple-motion-effect inline-flex items-center rounded-lg px-4 py-2 text-sm font-semibold shadow-lg transition duration-200 focus:outline-none"
+                      className="purple-motion-effect inline-flex items-center justify-center rounded-full px-5 py-2 font-mono text-sm font-bold leading-tight"
                       style={{
                         border: '1px solid rgba(240, 194, 255, 0.34)',
-                        background: 'var(--accent-gradient)',
-                        '--pme-color': '#201C36',
+                        background: 'linear-gradient(135deg, #5A2F87 0%, #C58BFF 100%)',
+                        '--pme-color': '#F4EDEA',
                         '--pme-hover-color': '#201C36',
                         '--pme-wipe-bg': '#F0C2FF',
                       } as React.CSSProperties}
@@ -203,18 +203,18 @@ export default function ProblemsPage(props: PageProps<DataProps>) {
                   </button>
                   <button
                     onClick={() => sendRandom(random + 1)}
-                    className="purple-motion-effect inline-flex items-center rounded-lg px-4 py-2 text-sm font-semibold shadow-lg transition duration-200 focus:outline-none"
+                    className="purple-motion-effect inline-flex items-center justify-center rounded-full px-5 py-2 font-mono text-sm font-bold leading-tight"
                     style={{
                       border: '1px solid rgba(240, 194, 255, 0.34)',
-                      background: 'rgba(36, 26, 49, 0.84)',
-                      '--pme-color': '#F0C2FF',
-                      '--pme-hover-color': '#241A31',
+                      background: 'linear-gradient(135deg, #FFF8FF 0%, #F3E7FF 38%, #D7B2FF 100%)',
+                      '--pme-color': '#2C1842',
+                      '--pme-hover-color': '#201C36',
                       '--pme-wipe-bg': '#F0C2FF',
                     } as React.CSSProperties}
                     title={'Go to a random unsolved problem'}
                   >
                     <svg
-                      className={'mr-2 h-5 w-5 text-gray-200'}
+                      className={'mr-2 h-5 w-5 text-[#2C1842]'}
                       fill="none"
                       stroke="currentColor"
                       viewBox="0 0 24 24"
