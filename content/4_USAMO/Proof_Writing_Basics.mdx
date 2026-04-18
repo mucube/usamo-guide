@@ -2,7 +2,7 @@
 
 id: proof-writing-basics
 title: Proof Writing Basics
-author: Nico Young
+author: Nico Young and Lalith 
 description: Structure, clarity, and rigor for olympiad proofs.
 prerequisites: []
 ---
@@ -19,6 +19,8 @@ Isn't it okay as long as I can get a 7?"*
 Evan Chen has a nice answer to this question: 
 see https://web.evanchen.cc/faq-contest.html#C-24
 
+The main idea of proof writing is that everyone who reads the proof should be able to understand why that statement is true. And understanding the 'why' aspect is crucial. without that I can claim anything is true. If proof writing is not there, I can  do ridiculous things. For example, I can say that $x>x$. It seems ridiculous and that is what will happen without proof writing. In fact, you cannot get a 7 without a proper written proof*. Some tips while writing proofs are:
+
 * Clearly state what you are proving and define all variables.
 * Write in complete sentences and justify each step.
 * Identify and highlight the key invariant, idea, or construction early.
@@ -30,7 +32,7 @@ see https://web.evanchen.cc/faq-contest.html#C-24
 ### Induction
 
 To prove a statement for all integers $n \ge 1$, establish a base case and then
-show that truth for $n = k$ implies truth for $n = k+1$.
+show that truth for $n = k$ implies truth for $n = k+1$. However we cannot use this for statements which requires the state of multiple variables such as a degree 2 or more recursive sequence (Where strong induction will be used).
 
 #### Example
 
@@ -104,7 +106,34 @@ $$
 X \implies Y \implies Z.
 $$
 
-Avoid gaps in reasoning—every implication must be justified.
+Avoid gaps in reasoning—every implication must be justified. Avoid circular proofs, where you justify a statement with the statement itself. 
+
+#### Example
+
+**Claim.**
+$$
+a^2 + b^2 = c^2
+$$
+
+**Proof.**
+$$
+\sin(x)^2 + \cos(x)^2 = 1
+$$
+Now let the hypotenuse be  represented by c, the opposite by b and the adjacent by a. Then:
+
+$$
+\sin(x) = \frac{b}{c}\quad\cos(x) = \frac{a}{c} \implies (\frac{b}{c})^2+(\frac{a}{c})^2=1
+$$
+Hence,
+$$
+(\frac{b}{c})^2+(\frac{a}{c})^2=\frac{b^2}{c^2}+\frac{a^2}{c^2}=1
+$$
+$$
+\frac{b^2}{c^2}+\frac{a^2}{c^2}=1 \implies \boxed {a^2+b^2=c^2}
+$$
+Holds for all $a,b,c \in \mathbb{R}$
+
+**Note:** This example is of a cirular proof and the proof is wrong
 
 ---
 
@@ -139,6 +168,7 @@ Many otherwise strong solutions lose points due to missing cases. Always verify:
 * Failing to prove all required cases
 * Using unjustified or illogical steps
 * Poor structure or unclear organization
+* Usage of circular reasoning
 
 ---
 ## mathematical argument 
@@ -194,7 +224,7 @@ For a general advise:
 - **Be careful of the definition!** Wrong claims or typo's can be 
 	fixed quite easily by a grader, but if you write a definition wrong 
 	there's no way a grader can fix it. In particular, 
-	**include diagram if you need.**
+	**include diagram a if you need.**
 
 ## style argument 
 
@@ -229,12 +259,19 @@ More precisely:
 	$\measuredangle ARC
     =\measuredangle ARQ+\measuredangle QRC 
     =\measuredangle APQ+\measuredangle QXC 
-    =\measuredangle APQ+\measuredangle QAP =\measuredangle AQP=\measuredangle AQD=\measuredangle ACD=\measuredangle ABC$ write 
-	$\measuredangle ARC
-    =\measuredangle ARQ+\measuredangle QRC 
-    =\measuredangle APQ+\measuredangle QXC 
-    =\measuredangle APQ+\measuredangle QAP =\measuredangle AQP=\measuredangle AQD=\measuredangle ACD=\measuredangle ABC $ 
-	% TODO (how to implement align*??)
+    =\measuredangle APQ+\measuredangle QAP =\measuredangle AQP=\measuredangle AQD=\measuredangle ACD=\measuredangle ABC$.
+	 Instead write:
+$$
+\begin{array}{rll}
+\measuredangle ARC & = \measuredangle ARQ + \measuredangle QRC \\
+& = \measuredangle APQ + \measuredangle QXC \\
+& = \measuredangle APQ + \measuredangle QAP \\
+& = \measuredangle AQP \\
+& = \measuredangle AQD \\
+& = \measuredangle ACD \\
+& = \measuredangle ABC
+\end{array}
+$$
 - Include more space than you really think. 
 - Include diagrams if you can. 
 - Write more! If a definition of an object you gave was complicated, 
@@ -260,7 +297,8 @@ Here's a short section about writing in the contest.
 
 ## Example
 
-TODO 
+**Question**
+Let a and b be natural numbers such that 
 
 
 ## Practice Problems
