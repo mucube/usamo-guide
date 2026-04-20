@@ -28,7 +28,7 @@ Suppose there are $n$ people, each of whom has a name tag. The name tags are shu
 #### Solution
 Label the people $1,2,...,n$. The trick here is to define the *indicator variable* $X_i$ to be 0 if person $i$ does not get his name tag and 1 if person $i$ does get his name tag. Notice that $X_1+X_2+\cdot\cdot\cdot+X_n$ is just the number of people who got their own name tag.
 
-> Using indicator variables which take on a value of 0 or 1 is a common trick.
+> Using indicator variables which take on a value of 0 or 1 is a common trick, sinec it allows us to transform counting problems into expected value problems.
 
 $E[X_i]=\frac{1}{n}$, as each person has a $\frac{1}{n}$ probability of getting their own name tag. Hence the expected number of people who got their own name tag is $E[X_1+X_2+\cdot\cdot\cdot+X_n]=E[X_1]+E[X_2]+\cdot\cdot\cdot+E[X_n]=n\cdot\frac{1}{n}=\boxed{1}$.
 
