@@ -9,13 +9,20 @@ prerequisites: [intro-probability]
 ### Overview
 A *random variable* is defined as a number whose value is determined by a random process, like a die roll. The *expected value* of a random variable is a fancy way of saying its average value.
 
-Let $P(e)$ be the probability of event $e$ happening. For a random variable $X$ with outcomes $x_1, x_2, \ldots, x_n$ occurring with probabilities $p_1, p_2, \ldots, p_n$ is the weighted average:
+Let $P(e)$ be the probability of event $e$ happening. If we have a random variable $X$ with outcomes $x_1, x_2, \ldots, x_n$ occurring with probabilities $p_1, p_2, \ldots, p_n$, then the expected value is the weighted average
 
-$$E[X] \;=\; \sum_{i=1}^{n} x_i \, p_i.$$
+$$E[X] = x_1p_1+x_2p_2+\cdot\cdot\cdot+x_np_n.$$
 
-There are two very important facts about expected value.
+From this definition we clearly have:
+
+1. $E[X+c]=E[X]+c$
+2. $E[cX] = cE[X]$
+
+for some constant $c$.
+
+There are also two other very important, but a bit less obvious, facts about expected value.
 1. If $X, Y$ are two *independent* random variables, then $E[XY] = E[X]E[Y]$.
-2. *Linearity of Expectation*: If $X,Y$ are two random variables, then $E[X+Y]=E[X]+E[Y]$. This is true *regardless* of whether or not $X,Y$ are independent.
+2. *Linearity of Expectation*: If $X,Y$ are two random variables, then $E[X+Y]=E[X]+E[Y]$. This is true *regardless* of whether or not $X,Y$ are independent. **This is arguably the most important property of expected value.**
 ### A Simple Example
 In a dice roll, the possible outcomes are $1,2,3,4,5,6$ and the probability of each is $\frac{1}{6}$, so the expected value is
 
@@ -48,7 +55,7 @@ For any given pair $p_i$, there are $\binom{28}{3}$ possible subsets that includ
 
 Then $E[X_1+X_2+\cdot\cdot\cdot+X_{29}]=E[X_1]+E[X_2]+\cdot\cdot\cdot+E[X_{29}]=29\cdot\frac{1}{29}\cdot\frac{2}{3}=\boxed{\frac{2}{3}}$
 
->Expected value can be an extremely powerful tool for counting problems, as you can see by taking a look at the [solutions to this problem that don't use expected value](https://artofproblemsolving.com/wiki/index.php/2021_Fall_AMC_12B_Problems/Problem_23). Linearity of expectation allows us to break apart a complicated structure into simple parts without worrying about how they will affect each other.
+>Expected value can be an extremely powerful tool for simplifying counting problems, as you can see by taking a look at the [solutions to this problem that don't use expected value](https://artofproblemsolving.com/wiki/index.php/2021_Fall_AMC_12B_Problems/Problem_23). Linearity of expectation allows us to break apart a complicated structure into simple parts without worrying about how they will affect each other.
 
 <!-- probably too hard for intermediate level
 ### Worked Example #3 (1991 Canada MO #2)
