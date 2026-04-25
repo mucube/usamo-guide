@@ -571,7 +571,7 @@ export default function IndexPage({ path }): JSX.Element {
             &copy; {new Date().getFullYear()} USAMO Guide.
             <br />
             No part of this website may be reproduced or commercialized in any manner without prior written permission.{' '}
-            <Link to="https://github.com/usamoguide/usamo-guide/blob/main/LICENSE" style={linkStyle}>
+            <Link to="https://usamoguide.com/license.txt" style={linkStyle}>
               License
             </Link>
             {' | '}
