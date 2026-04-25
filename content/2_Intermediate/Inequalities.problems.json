@@ -1,36 +1,28 @@
 {
-  "MODULE_ID": "inequalities",
-  "practice": [
-    {
-      "uniqueId": "amc10-2015b-20",
-      "name": "Problem 20 (2015 AMC 10B)",
-      "url": "https://artofproblemsolving.com/wiki/index.php/2015_AMC_10B_Problems/Problem_20",
-      "source": "AMC 10",
-      "difficulty": "Hard",
-      "isStarred": true,
-      "tags": [
-        "AM-GM",
-        "Algebra"
-      ],
-      "statement": "This is a 2015 AMC 10B problem focusing on AM-GM inequality and algebra. See the full problem statement on [AoPS](https://artofproblemsolving.com/wiki/index.php/2015_AMC_10B_Problems/Problem_20).",
-      "solutionMetadata": {
-        "kind": "none"
-      }
-    },
-    {
-      "uniqueId": "amc12-2018b-19",
-      "name": "Problem 19 (2018 AMC 12B)",
-      "url": "https://artofproblemsolving.com/wiki/index.php/2018_AMC_12B_Problems/Problem_19",
-      "source": "AMC 12",
-      "difficulty": "Hard",
-      "isStarred": false,
-      "tags": [
-        "Cauchy-Schwarz"
-      ],
-      "statement": "This is a 2018 AMC 12B problem focusing on Cauchy-Schwarz inequality. See the full problem statement on [AoPS](https://artofproblemsolving.com/wiki/index.php/2018_AMC_12B_Problems/Problem_19).",
-      "solutionMetadata": {
-        "kind": "none"
-      }
-    }
-  ]
+    "MODULE_ID":  "inequalities",
+    "practice":  [
+                     {
+                         "uniqueId":  "algebra-equations-and-inequalities-auto-1556",
+                         "name":  "Harvard-MIT Mathematics Tournament #0ipw",
+                         "url":  "https://usamoguide.com/",
+                         "source":  "Harvard-MIT Mathematics Tournament",
+                         "difficulty":  "Hard",
+                         "isStarred":  false,
+                         "tags":  [
+                                      "Equations and Inequalities",
+                                      "Other"
+                                  ],
+                         "statement":  "Problem:\nSolve the equation\n$$\n\\sqrt{x+\\sqrt{4 x+\\sqrt{16 x+\\sqrt{\\ldots+\\sqrt{4^{2008} x+3}}}}}-\\sqrt{x}=1\n$$\nExpress your answer as a reduced fraction with the numerator and denominator written in their prime factorization.",
+                         "interaction":  {
+                                             "type":  "none"
+                                         },
+                         "solutionReveal":  {
+                                                "mode":  "inline",
+                                                "markdown":  "Solution:\nAnswer: $\\frac{1}{2^{4016}}$\n\nRewrite the equation to get\n$$\n\\sqrt{x+\\sqrt{4 x+\\sqrt{16 x+\\sqrt{\\ldots+\\sqrt{4^{2008} x+3}}}}}=\\sqrt{x}+1\n$$\nSquaring both sides yields\n$$\n\\sqrt{4 x+\\sqrt{\\ldots+\\sqrt{4^{2008} x+3}}}=2 \\sqrt{x}+1\n$$\nSquaring again yields\n$$\n\\sqrt{16 x+\\sqrt{\\ldots+\\sqrt{4^{2008} x+3}}}=4 \\sqrt{x}+1\n$$\nOne can see that by continuing this process one gets\n$$\n\\sqrt{4^{2008} x+3}=2^{2008} \\sqrt{x}+1\n$$\nso that $2 \\cdot 2^{2008} \\sqrt{x}=2$. Hence $x=4^{-2008}$.\nIt is also easy to check that this is indeed a solution to the original equation."
+                                            },
+                         "solutionMetadata":  {
+                                                  "kind":  "none"
+                                              }
+                     }
+                 ]
 }
