@@ -1,39 +1,51 @@
 ---
 id: euler-totient-theorem
 title: Euler's Totient Theorem
-author: Macquel Ko
+author: Aaron He
 description: Fundamental theorem in modular arithmetic.
-prerequisites: ["modular-arithmetic"]
+prerequisites: ["modular-arithmetic", "divisor-functions"]
 ---
 
-## Overview
+## Introduction
+In this unit we will discuss and prove **Euler's Totient Theorem**, which states that if $n$ and $a$ are coprime positive integers, then
 
-this section will go over Euler's Totient theorem, a fundamental theorem in modular arithmetic which appears in numerous competitions from AMC to USAMO.
+$$
+a^{\varphi(n)} \equiv 1 \pmod{n}
+$$
 
-## Key Ideas
+Here, $\varphi(n)$ denotes Euler's totient function, which counts the number of positive integers smaller than $n$ which are coprime to $n$.
 
-- The theorem states that for coprime integers a and n, then $a^{\phi(n)} \equiv 1$ mod n where $\phi(n)$ is equal to the number of integers $k \lt n$ which are coprime to n.
+The converse of the theorem is also true; if the congruence holds, then $a$ and $n$ are coprime.
 
-- This theorem has the advantage over Fermat's little theorem in that n is not restricted to being a prime, meaning you can apply this theorem to composite numbers.
+The special case where $n$ is prime is known as **Fermat's Little Theorem**, which states that if $p$ is prime and $a$ is an integer not divisible by $p$, then
 
-- Euler's Totient function of an integer n calculates the quantity of numbers which are coprime to n. We can calculate this by using another theorem, namely
+$$
+a^{p-1} \equiv 1 \pmod{p}
+$$
 
-$\phi(n) = n \prod_{p | n} = p_{1}(1 -\frac{1}{p_{1}}) p_{2} (1- \frac{1}{p_{2}}) \cdots p_{n} (1-\frac{1}{p_{n}})$
+## Modular Inverses
+Our proof of Euler's Totient Theorem will rely heavily on the concept of the **modular multiplicative inverse**. We will say that that the modular multiplicative inverse of $a$ is an integer $x$ such that
 
-where the product is taken over all distinct primes which divide n. Furthermore, Euler's Totient function is multiplicative, meaning that $\phi(ab) = \phi(a) \phi(b)$ for all $a,b \in \mathbb{Z}$.
+$$
+a\cdot x \equiv 1 \pmod{n}
+$$
 
-## Worked Example
+$x$ is also often denoted as $a^{-1}$.
 
-(AoPS) Find the last 2 digits of $7^{81} - 3^{81}$.
+Observe that if $x$ is the inverse of $a$, then $a$ is the inverse of $x$. In other words, modular inverses come in pairs.
 
-First, notice that the last 2 digits of the expression is simply the result when taken mod 100, and $\phi(n) = 40$. Therefore we can use Euler's theorem
-to reduce the expression to $7^{1} - 3^{1} \equiv 04$ mod 100.
+Also, the modular inverse does not always exist. For example, if $n=4$, then $a=2$ has no modular inverse, which can be seen by checking all possible values mod $4$. It turns out that $a$ only has a modular inverse working mod $n$ if and only if $a$ and $n$ are coprime, which can be seen by treating the congruence as a linear Diophantine equation and applying Bezout's identity.
 
-## Common Pitfalls
+## Proof of Euler's Totient Theorem
+Now we can return to our original task. Let $a,n$ be coprime positive integers. Define the set $R$ to be all positive integers smaller than $n$ that are coprime to $n$. This set of course has $\varphi(n)$ elements, which we will label $R=\{x_1, x_2, ..., x_{\varphi(n)}\}$.
 
-- incorrectly calculating $\phi(n)$.
-- applying the theorem when a and n are NOT coprime.
-- incorrectly reducing bases.
+Our proof hinges on the fact that multiplying all the $x_i$ by $a$ will permute them mod $n$, or in other words:
+
+*Claim:* Let $aR = \{a\cdot x_1, a\cdot x_2, ..., a\cdot x_{\varphi(n)} \}$. Then $aR$ is identical to $R$ when considered mod $n$. (they are sets so they may be ordered differently)
+
+*Proof:* Every element of $aR$ is coprime to $n$, and is thus congruent to some element of $R$. Thus we only need to prove that no two distinct elements of $aR$ can be congruent.
+
+Assume we have $i,j$ such that $a\cdot x_i \equiv a\cdot x_j \pmod{n}$. Then we can multply both sides of the congruence by $a^{-1}$ to get $x_i \equiv x_j \pmod{n}$, concluding the proof. $\square$
 
 ## Practice Problems
 
