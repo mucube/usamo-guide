@@ -23,19 +23,6 @@ $$
 a^{p-1} \equiv 1 \pmod{p}
 $$
 
-## Modular Inverses
-Our proof of Euler's Totient Theorem will rely heavily on the concept of the **modular multiplicative inverse**. We will say that that the modular multiplicative inverse of $a$ is an integer $x$ such that
-
-$$
-a\cdot x \equiv 1 \pmod{n}
-$$
-
-$x$ is also often denoted as $a^{-1}$.
-
-Observe that if $x$ is the inverse of $a$, then $a$ is the inverse of $x$. In other words, modular inverses come in pairs.
-
-Also, the modular inverse does not always exist. For example, if $n=4$, then $a=2$ has no modular inverse, which can be seen by checking all possible values mod $4$. It turns out that $a$ only has a modular inverse working mod $n$ if and only if $a$ and $n$ are coprime, which can be seen by treating the congruence as a linear Diophantine equation and applying Bezout's identity.
-
 ## Proof of Euler's Totient Theorem
 Now we can return to our original task. Let $a,n$ be coprime positive integers. Define the set $R$ to be all positive integers smaller than $n$ that are coprime to $n$. This set of course has $\varphi(n)$ elements, which we will label $R=\{x_1, x_2, ..., x_{\varphi(n)}\}$.
 
@@ -45,7 +32,7 @@ Our proof hinges on the fact that multiplying all the $x_i$ by $a$ will permute 
 
 *Proof:* Every element of $aR$ is coprime to $n$, and is thus congruent to some element of $R$. Thus we only need to prove that no two distinct elements of $aR$ can be congruent.
 
-Assume we have $i,j$ such that $a\cdot x_i \equiv a\cdot x_j \pmod{n}$. Then we can multply both sides of the congruence by $a^{-1}$ to get $x_i \equiv x_j \pmod{n}$, concluding the proof. $\square$
+Assume we have $i,j$ such that $a\cdot x_i \equiv a\cdot x_j \pmod{n}$. Then we can multply both sides of the congruence by the modular inverse of $a$ to get $x_i \equiv x_j \pmod{n}$, concluding the proof. $\square$
 
 Since $R$ and $aR$ are identical mod $n$, the products of all the elements of $R$ is congruent to the product of all the elements of $aR$.
 
