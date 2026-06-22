@@ -47,6 +47,27 @@ Our proof hinges on the fact that multiplying all the $x_i$ by $a$ will permute 
 
 Assume we have $i,j$ such that $a\cdot x_i \equiv a\cdot x_j \pmod{n}$. Then we can multply both sides of the congruence by $a^{-1}$ to get $x_i \equiv x_j \pmod{n}$, concluding the proof. $\square$
 
+Since $R$ and $aR$ are identical mod $n$, the products of all the elements of $R$ is congruent to the product of all the elements of $aR$.
+
+$$
+\prod_{i=1}^{\varphi(n)} x_i \equiv 
+\prod_{i=1}^{\varphi(n)} ax_i =
+a^{\varphi(n)}\prod_{i=1}^{\varphi(n)} x_i \pmod{n}
+$$
+
+We can then multiply both sides by the modular inverse of each $x_i$ to get
+
+$$
+a^{\varphi(n)}\equiv 1 \pmod{n}. 
+$$
+
+## Applications
+Euler's Totient Theorem is mainly used in number theory problems involving exponents. In particular, it tells us that $a^{b} \equiv a^{b \pmod{\varphi(n)}} \pmod{n}$ when $a,n$ coprime. Here is a direct application of this fact:
+
+> Let $a_n=6^{n}+8^{n}$. Determine the remainder upon dividing $a_ {83}$ by $49$. (1983 AIME #6)
+
+*Solution:* $\varphi(49)=42$. Thus $6^{83} + 8^{83} \equiv 6^{-1} + 8^{-1} \equiv \frac{8+6}{48} \equiv \frac{14}{-1} \equiv \boxed{035} \pmod{49}$.
+
 ## Practice Problems
 
 <Problems problems="practice" />
